@@ -1,5 +1,4 @@
 name: Build and Test xios node module 
-run-name: ${{ github.actor }}: build and test node module
 on: [push]
 jobs:
   check-bats-version:
