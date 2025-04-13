@@ -1,7 +1,5 @@
 #! /usr/bin/bash
 
-cd ~/Documents/GitHub/wolfXios/
-
 rm -r build_bak
 mkdir build_bak
 
