@@ -1,6 +1,6 @@
 #! /usr/bin/bash
 
-rm -r build_bak
+rm -rf build_bak
 mkdir build_bak
 
 cp *.o ./build_bak
