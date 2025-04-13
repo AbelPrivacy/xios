@@ -1,0 +1,9 @@
+node_modules
+build
+*.o
+*.a
+xios_driver
+*.db
+.vscode
+.DS_STORE
+run_tests
