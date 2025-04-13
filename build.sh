@@ -3,17 +3,17 @@
 rm -rf build_bak
 mkdir build_bak
 
-cp -f *.o ./build_bak
-cp -f *.so ./build_bak
-cp -f *.a ./build_bak
-cp -f *.dylib ./build_bak
+cp *.o ./build_bak || :
+cp *.so ./build_bak || :
+cp *.a ./build_bak || :
+cp *.dylib ./build_bak || :
 
-cp -r build ./build_bak/build
+cp -r build ./build_bak/build || :
 
 rm -f *.o
 rm -f *.so
 rm -f *.a
-rm -f -f *.dyl-f ib
+rm -f *.dylib
 
 rm -f run_tests
 rm -f xios_driver
