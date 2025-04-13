@@ -1,7 +1,7 @@
 name: Build and Test xios node module 
 on: [push]
 jobs:
-  build and test:
+  build-and-test:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
