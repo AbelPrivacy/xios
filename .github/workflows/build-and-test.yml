@@ -8,5 +8,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
+      - run: sudo apt-get update
+      - run: sudo apt-get -y install libwolfssl-dev
       - run: source ./build.sh
       - run: ./run_tests
