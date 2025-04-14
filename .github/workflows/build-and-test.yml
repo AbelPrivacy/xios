@@ -11,6 +11,8 @@ jobs:
       - run: sudo apt-get update
       - run: sudo apt-get -y install libwolfssl-dev
       - run: sudo apt-get -y install node-gyp
+      - run: sudo apt-get -y install sqlite3
+      - run: sudo apt-get -y install node-addon-api
       - run: npm i
       - run: source ./build.sh
       - run: ./run_tests
