@@ -7,7 +7,7 @@
         "<!(node -p \"require('node-addon-api').include\")",
         "/Users/kylemcgrath/homebrew/Cellar/wolfssl/5.7.6/include",
         "/Users/kylemcgrath/homebrew/Cellar/sqlite/3.49.1/include",
-        "/Users/kylemcgrath/Documents/GitHub/wolfXios/node_modules/node-addon-api"
+        "./node_modules/node-addon-api"
       ],
       "libraries": [
         "-L/Users/kylemcgrath/homebrew/Cellar/wolfssl/5.7.6/lib -lwolfssl",
