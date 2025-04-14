@@ -1,0 +1,18 @@
+name: Build and Test xios node module 
+on: [push]
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - run: sudo apt-get update
+      - run: sudo apt-get -y install libwolfssl-dev
+      - run: sudo apt-get -y install node-gyp
+      - run: sudo apt-get -y install sqlite3
+      - run: sudo apt-get -y install node-addon-api
+      - run: npm i package.json
+      - run: source ./build.sh
+      - run: ./run_tests

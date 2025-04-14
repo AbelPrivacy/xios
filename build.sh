@@ -1,24 +1,22 @@
 #! /usr/bin/bash
 
-cd ~/Documents/GitHub/wolfXios/
-
-rm -r build_bak
+rm -rf build_bak
 mkdir build_bak
 
-cp *.o ./build_bak
-cp *.so ./build_bak
-cp *.a ./build_bak
-cp *.dylib ./build_bak
+cp *.o ./build_bak || :
+cp *.so ./build_bak || :
+cp *.a ./build_bak || :
+cp *.dylib ./build_bak || :
 
-cp -r build ./build_bak/build
+cp -r build ./build_bak/build || :
 
-rm *.o
-rm *.so
-rm *.a
-rm *.dylib
+rm -f *.o
+rm -f *.so
+rm -f *.a
+rm -f *.dylib
 
-rm run_tests
-rm xios_driver
+rm -f run_tests
+rm -f xios_driver
 
 
 g++ -std=c++17 -lwolfssl -lsqlite3 -o secure_http_client -c xios.cpp \
