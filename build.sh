@@ -26,7 +26,9 @@ g++ -std=c++17 -lwolfssl -lsqlite3 -o secure_http_client -c xios.cpp \
     -I ~/homebrew/Cellar/sqlite/3.49.1/include \
     -o xios.o
 
-g++ -std=c++17 ./test/test.cpp ./test/test_parseURL.cpp xios.o \
+g++ -std=c++17 ./test/test.cpp ./test/test_parseURL.cpp \
+    ./test/test_parseURL.cpp\
+    xios.o \
     -I ~/homebrew/Cellar/wolfssl/5.7.6/include \
     -L ~/homebrew/Cellar/wolfssl/5.7.6/lib \
     -L ~/homebrew/Cellar/sqlite/3.49.1/lib \
