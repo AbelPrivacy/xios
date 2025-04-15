@@ -7,3 +7,4 @@ xios_driver
 .vscode
 .DS_STORE
 run_tests
+venv
