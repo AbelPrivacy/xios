@@ -13,8 +13,7 @@ jobs:
 
       - name: Configure homebrew
         run: |
-          unalias brew
-          eval "$(!/homebrew/bin/brew shellenv)"
+          eval "$(!~/homebrew/bin/brew shellenv)"
 
       - name: Install wolfssl
         run: |
