@@ -11,7 +11,9 @@ jobs:
         with:
           node-version: '20'
 
-      - run: npm install
+      - run: |
+          npm i node-addon-api
+          npm i node-gyp
 
       - name: Set up Python venv
         run: |
