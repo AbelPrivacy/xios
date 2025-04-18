@@ -17,14 +17,14 @@ jobs:
 
       - name: Set up Python venv
         run: |
-          python -m venv venv
+          python3 -m venv venv
           source ./venv/bin/activate
           pip install -r requirements.txt
 
       - name: Start REST API in background
         run: |
           source ./venv/bin/activate
-          nohup python ./test/test_rest_api/app.py > server.log 2>&1 &
+          nohup python3 ./test/test_rest_api/app.py > server.log 2>&1 &
           echo $! > server.pid
           sleep 5  # wait for the server to become responsive
 
