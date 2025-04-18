@@ -12,7 +12,6 @@ jobs:
           node-version: '20'
 
       - run: sudo apt-get -y install libwolfssl-dev
-      - run: sudo apt-get -y install node-gyp
       - run: sudo apt-get -y install sqlite3
 
       - run: npm install
