@@ -10,7 +10,7 @@ void testGet() {
     std::vector<std::string> proto;
     proto.push_back("TLSv1.3");
     std::vector<std::string> algo;
-    algo.push_back("TLS13-AES256-GCM-SHA384");
+    algo.push_back("TLS_AES_256_GCM_SHA384");
     std::vector<std::string> empty;
     cout << 1 << endl;
     SecureHttpClient::initialize(
