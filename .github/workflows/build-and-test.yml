@@ -11,6 +11,10 @@ jobs:
         with:
           node-version: '20'
 
+      - name: Configure homebrew
+        run: |
+          eval "$(!/homebrew/bin/brew shellenv)"
+
       - name: Install wolfssl
         run: |
           brew install wolfssl sqlite
