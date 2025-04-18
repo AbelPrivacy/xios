@@ -11,7 +11,12 @@ jobs:
         with:
           node-version: '20'
 
-      - run: |
+      - name: Install wolfssl
+        run: |
+          brew install wolfssl
+
+      - name: Set up Python venv
+        run: |
           npm i node-addon-api
           npm i node-gyp
 
