@@ -1,4 +1,4 @@
-#! /usr/bin/bash
+#! /bin/bash
 
 rm -rf build_bak
 mkdir build_bak
