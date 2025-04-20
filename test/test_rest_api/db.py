@@ -1,7 +1,49 @@
-from  sqlite4  import  SQLite4
+from sqlalchemy import create_engine
 
-db = SQLite4('./test_db.db')
+engine = create_engine(
+    "sqlite:///test_db.db"
+)
 
-def init_db():
-    with current_app.open_resource("schema.sql") as f:
-        db.executescript(f.read().decode("utf8"))
+from sqlalchemy import Column, String, DateTime, BLOB
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import Session
+from datetime import datetime
+from uuid import uuid4
+
+Base = declarative_base()
+
+class request(Base):
+    __tablename__ = "request"
+
+    request_id = Column(BLOB, primary_key=True)
+    http_method = Column(String)
+    timestamp = Column(DateTime)
+
+    def __init__(self, http_method):
+        self.request_id = uuid4().bytes
+        self.http_method = http_method
+        self.timestamp = datetime.now()
+        super().__init__()
+
+    def __repr__(self):
+        return f"request: {self.request_id.hex()}, {self.http_method}, {self.timestamp}"
+
+    def __str__(self):
+        return f"request: {self.request_id.hex()}, {self.http_method}, {self.timestamp}"
+
+Base.metadata.drop_all(engine)
+Base.metadata.create_all(engine)
+
+with Session(engine) as session:
+    session.begin()
+    session.add(request("DEMO-GET"))
+    session.add(request("DEMO-POST"))
+    session.add(request("DEMO-GET"))
+    session.commit()
+
+# with Session(engine) as session:
+#     from sqlalchemy import select
+#     stmt = select(request)
+
+#     for request in session.scalars(stmt):
+#         print(request)

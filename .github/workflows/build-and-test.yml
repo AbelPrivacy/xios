@@ -3,7 +3,7 @@ on: [push]
 
 jobs:
   build-and-test:
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
@@ -11,22 +11,18 @@ jobs:
         with:
           node-version: '20'
 
-      - run: sudo apt-get -y install libwolfssl-dev
-
-      - run: npm install
+      - run: sudo apt-get -y install libwolfssl-dev sqlite
 
       - name: Set up Python venv
         run: |
-          python -m venv venv
+          npm i node-addon-api
+          npm i node-gyp
+
+      - name: Set up Python venv
+        run: |
+          python3 -m venv venv
           source ./venv/bin/activate
           pip install -r requirements.txt
-
-      - name: Start REST API in background
-        run: |
-          source ./venv/bin/activate
-          nohup python ./test/test_rest_api/app.py > server.log 2>&1 &
-          echo $! > server.pid
-          sleep 5  # wait for the server to become responsive
 
       - name: Build native module
         run: |

@@ -1,4 +1,4 @@
-#! /usr/bin/bash
+#! /bin/bash
 
 rm -rf build_bak
 mkdir build_bak
@@ -15,9 +15,12 @@ rm -f *.so
 rm -f *.a
 rm -f *.dylib
 
+rm -f metadata.db
+
 rm -f run_tests
 rm -f xios_driver
 
+g++ --std=c++20 ./util/reverse-https-proxy.cpp -I ~/homebrew/include/ -L ~/homebrew/Cellar/wolfssl/5.7.6/lib -lwolfssl -o ./util/reverse-https-proxy
 
 g++ -std=c++17 -lwolfssl -lsqlite3 -o secure_http_client -c xios.cpp \
     -I ~/homebrew/Cellar/wolfssl/5.7.6/include \
@@ -52,6 +55,33 @@ g++ -std=c++17 ./test/test_server/test_server.cpp xios.o \
     -lwolfssl -lsqlite3 \
     -o test_server
 
-./run_tests
-
 node-gyp configure build
+
+source ./venv/bin/activate
+
+echo "Starting proxy server..."
+./util/reverse-https-proxy 127.0.0.1 8080 443 > proxy.log 2>&1 &
+PROXY_PID=$!
+sleep 2  # Wait for proxy to start
+
+python test/test_rest_api/app.py > backend.log 2>&1 &
+BACKEND_PID=$!
+sleep 2 
+
+echo "Running test client..."
+if ./run_tests; then
+    echo "Integration test PASSED"
+    kill "$PROXY_PID"
+    kill "$BACKEND_PID"
+    exit 0
+else
+    echo "Integration test FAILED"
+    cat proxy.log || true
+    cat backend.log || true
+    kill "$PROXY_PID"
+    kill "$BACKEND_PID"
+    exit 1
+fi
+
+
+
