@@ -4,7 +4,7 @@ engine = create_engine(
     "sqlite:///test_db.db"
 )
 
-from sqlalchemy import Integer, Column, String, DateTime, BLOB
+from sqlalchemy import Column, String, DateTime, BLOB
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import Session
 from datetime import datetime

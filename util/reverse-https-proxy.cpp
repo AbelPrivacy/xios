@@ -41,6 +41,27 @@ int connect_backend() {
     return sockfd;
 }
 
+WOLFSSL_CTX* create_wolfSSL_CTX() 
+{
+    wolfSSL_Init();
+
+    // TLS server context with any available cipher
+    WOLFSSL_CTX* ctx = wolfSSL_CTX_new(wolfTLSv1_3_server_method());
+    if (!ctx) err_sys("wolfSSL_CTX_new failed");
+
+    if (wolfSSL_CTX_use_certificate_file(ctx, "util/certs/cert.pem", WOLFSSL_FILETYPE_PEM) != WOLFSSL_SUCCESS)
+        err_sys("Failed to load cert");
+
+    if (wolfSSL_CTX_use_PrivateKey_file(ctx, "util/certs/key.pem", WOLFSSL_FILETYPE_PEM) != WOLFSSL_SUCCESS)
+        err_sys("Failed to load key");
+
+    // Use all supported ciphers (including hybrid/OQS)
+    if (wolfSSL_CTX_set_cipher_list(ctx, "ALL") != WOLFSSL_SUCCESS)
+        err_sys("Failed to set cipher list");
+
+    return ctx;
+}
+
 int main(int argc, char** argv) {
 
 
@@ -60,21 +81,7 @@ int main(int argc, char** argv) {
     struct sockaddr_in addr, client;
     socklen_t client_len = sizeof(client);
 
-    wolfSSL_Init();
-
-    // TLS server context with any available cipher
-    WOLFSSL_CTX* ctx = wolfSSL_CTX_new(wolfTLSv1_3_server_method());
-    if (!ctx) err_sys("wolfSSL_CTX_new failed");
-
-    if (wolfSSL_CTX_use_certificate_file(ctx, "util/certs/cert.pem", WOLFSSL_FILETYPE_PEM) != WOLFSSL_SUCCESS)
-        err_sys("Failed to load cert");
-
-    if (wolfSSL_CTX_use_PrivateKey_file(ctx, "util/certs/key.pem", WOLFSSL_FILETYPE_PEM) != WOLFSSL_SUCCESS)
-        err_sys("Failed to load key");
-
-    // Use all supported ciphers (including hybrid/OQS)
-    if (wolfSSL_CTX_set_cipher_list(ctx, "ALL") != WOLFSSL_SUCCESS)
-        err_sys("Failed to set cipher list");
+    WOLFSSL_CTX *ctx = create_wolfSSL_CTX();
 
     sockfd = socket(AF_INET, SOCK_STREAM, 0);
     if (sockfd < 0) err_sys("Socket creation failed");
