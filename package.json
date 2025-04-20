@@ -2,5 +2,10 @@
   "dependencies": {
     "node-addon-api": "^8.3.1",
     "node-gyp": "^11.1.0"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.25.0",
+    "eslint": "^9.25.0",
+    "globals": "^16.0.0"
   }
 }
