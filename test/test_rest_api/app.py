@@ -1,6 +1,5 @@
 from flask import Flask
-import ssl
-import db
+
 
 app = Flask(__name__)
 
@@ -14,4 +13,5 @@ def post_request():
     return "POST /requests/"
 
 
-app.run(host="127.0.0.1", port="8080")
+if __name__ == "__main__":
+    app.run(host="127.0.0.1", port="8080")

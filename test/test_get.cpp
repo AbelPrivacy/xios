@@ -5,7 +5,6 @@
 using namespace std;
 
 void testGet() {
-  cout << 0 << endl;
     std::string db =  "./metadata.db";
     std::vector<std::string> proto;
     proto.push_back("TLSv1.3");

@@ -14,14 +14,14 @@ Base = declarative_base()
 class request(Base):
     __tablename__ = "request"
 
-    def __init__(self, id, http_method):
-        self.id = id
+    def __init__(self, request_id, http_method):
+        self.request_id = request_id
         self.http_method = http_method
         self.timestamp = datetime.now()
         super().__init__()
 
     def __repr__(self):
-        return f"request: {self.id}, {self.http_method}, {self.timestamp}"
+        return f"request: {self.request_id}, {self.http_method}, {self.timestamp}"
 
     id = Column(Integer, primary_key=True)
     http_method = Column(String)
@@ -35,12 +35,9 @@ with Session(engine) as session:
     session.add(request(2, "GET"))
     session.commit()
 
+# with Session(engine) as session:
+#     from sqlalchemy import select
+#     stmt = select(request)
 
-from pprint import pprint
-
-with Session(engine) as session:
-    from sqlalchemy import select
-    stmt = select(request)
-
-    for request in session.scalars(stmt):
-        print(request)
+#     for request in session.scalars(stmt):
+#         print(request)

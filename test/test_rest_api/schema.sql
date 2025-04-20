@@ -2,25 +2,22 @@ DROP TABLE IF EXISTS request;
 
 
 CREATE TABLE request (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
-  http_method TEXT NOT NULL,
+  request_id INTEGER PRIMARY KEY AUTOINCREMENT DEFAULT 1,
+  http_method TEXT,
   timestamp DATETIME2 NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
 INSERT INTO request (
-  0,
   'GET',
   DATETIME2(1970, 1, 1)
 )
 
 INSERT INTO request (
-  1,
   'POST',
   DATETIME2(1970, 1, 1)
 )
 
 INSERT INTO request (
-  2,
   'GET',
   DATETIME2(1970, 1, 1)
 )
