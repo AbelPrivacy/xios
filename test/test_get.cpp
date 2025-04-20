@@ -9,21 +9,17 @@ void testGet() {
     std::string db =  "./metadata.db";
     std::vector<std::string> proto;
     proto.push_back("TLSv1.3");
-    std::vector<std::string> algo;
-    algo.push_back("TLS_AES_256_GCM_SHA384");
-    std::vector<std::string> empty;
-    cout << 1 << endl;
+    std::vector<std::string> empty0;
+    std::vector<std::string> empty1;
+    std::vector<std::string> empty2;
     SecureHttpClient::initialize(
       db,
       proto,
-      algo,
-      empty,
-      empty // or ['KYBER_LEVEL1'] if supported
+      empty0,
+      empty1,
+      empty2 // or ['KYBER_LEVEL1'] if supported
     );
-    cout << 2 << endl;
-    std::string response = SecureHttpClient::get("https://127.0.0.1:8080/request/");
-    cout << 3 << endl;
-    cout << response << endl;
+    std::string response = SecureHttpClient::get("https://localhost/request/");
     assert(response.find("HTTP/1.1 200 OK") == 0);
     assert(response.find("Server: Werkzeug/3.1.3 Python/3.13.3") != -1);
     assert(response.find("Content-Type: text/html; charset=utf-8") != -1);

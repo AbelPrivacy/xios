@@ -6,3 +6,21 @@ CREATE TABLE request (
   http_method TEXT NOT NULL,
   timestamp DATETIME2 NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
+
+INSERT INTO request (
+  0,
+  'GET',
+  DATETIME2(1970, 1, 1)
+)
+
+INSERT INTO request (
+  1,
+  'POST',
+  DATETIME2(1970, 1, 1)
+)
+
+INSERT INTO request (
+  2,
+  'GET',
+  DATETIME2(1970, 1, 1)
+)

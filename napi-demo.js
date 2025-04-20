@@ -10,7 +10,7 @@ client.initialize(
 );
 
 try {
-  const res = client.get('https://www.google.com');
+  const res = client.get('https://localhost/request/');
   console.log(res);
 } catch (e) {
   console.error('Request failed:', e.message);
