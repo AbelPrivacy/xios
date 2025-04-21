@@ -13,6 +13,7 @@ jobs:
 
       - name: Install libwolfssl-dev and sqlite
         run: |
+          sudo apt-get update
           sudo apt-get -y install libwolfssl-dev sqlite
 
       - name: Set up Python venv
