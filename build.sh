@@ -20,9 +20,14 @@ rm -f metadata.db
 rm -f run_tests
 rm -f xios_driver
 
-g++ --std=c++20 ./util/reverse-https-proxy.cpp -I ~/homebrew/include/ -L ~/homebrew/Cellar/wolfssl/5.7.6/lib -lwolfssl -o ./util/reverse-https-proxy
-
 gh release download PQC-Release --repo AbelPrivacy/wolfssl
+
+g++ --std=c++20 ./util/reverse-https-proxy.cpp -I ~/homebrew/include/ \
+    -I build_x86_64/include \
+    -L build_x86_64/lib \
+    -I build-osx-arm64/wolfssl \
+    -L build-osx-arm64/lib -lwolfssl -o ./util/reverse-https-proxy
+
 
 tar -xzf build-x86_64.tar.gz
 tar -xzf build-osx-arm64.tar.gz
@@ -77,7 +82,7 @@ echo 'y' | npx node-gyp configure build
 source ./venv/bin/activate
 
 echo "Starting proxy server..."
-./util/reverse-https-proxy 127.0.0.1 8080 443 > proxy.log 2>&1 &
+./util/reverse-https-proxy 127.0.0.1 8080 127.0.0.1 1443 > proxy.log 2>&1 &
 PROXY_PID=$!
 sleep 2  # Wait for proxy to start
 

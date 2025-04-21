@@ -18,7 +18,7 @@ void testGet() {
       empty1,
       empty2 // or ['KYBER_LEVEL1'] if supported
     );
-    std::string response = SecureHttpClient::get("https://localhost/request/");
+    std::string response = SecureHttpClient::get("https://localhost:1443/request/");
     std::cout << "Response: " << response << "\n";
     assert(response.find("HTTP/1.1 200 OK") == 0);
     assert(response.find("Server: Werkzeug/3.1.3 Python/3.13.3") != -1);

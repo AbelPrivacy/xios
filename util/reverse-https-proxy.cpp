@@ -15,6 +15,7 @@
 #include <exception>
 
 
+char *proxy_server_addr;
 int proxy_server_port;
 const char *backend_host;
 int backend_port;
@@ -65,13 +66,15 @@ WOLFSSL_CTX* create_wolfSSL_CTX()
 int main(int argc, char** argv) {
 
 
-    if (argc == 4) {
-        proxy_server_port = atoi(argv[3]);
+    if (argc == 5) {
+        proxy_server_addr = argv[3];
+        proxy_server_port = atoi(argv[4]);
         backend_host = argv[1];
         backend_port = atoi(argv[2]);
     } else if(argc != 1) {
         return argc;
     } else {
+        proxy_server_addr = "127.0.0.1";
         proxy_server_port = 443;
         backend_host="127.0.0.1";
         backend_port=8080;
@@ -92,7 +95,7 @@ int main(int argc, char** argv) {
     memset(&addr, 0, sizeof(addr));
     addr.sin_family = AF_INET;
     addr.sin_port = htons(proxy_server_port);
-    addr.sin_addr.s_addr = INADDR_ANY;
+    inet_pton(AF_INET, proxy_server_addr, &addr.sin_addr);
 
     if (bind(sockfd, (struct sockaddr*)&addr, sizeof(addr)) < 0)
         err_sys("Bind failed");
