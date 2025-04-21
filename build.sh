@@ -22,15 +22,14 @@ rm -f xios_driver
 
 gh release download PQC-Release --repo AbelPrivacy/wolfssl
 
+tar -xzf build-x86_64.tar.gz
+tar -xzf build-osx-arm64.tar.gz
+
 g++ --std=c++20 ./util/reverse-https-proxy.cpp -I ~/homebrew/include/ \
     -I build_x86_64/include \
     -L build_x86_64/lib \
     -I build-osx-arm64/wolfssl \
     -L build-osx-arm64/lib -lwolfssl -o ./util/reverse-https-proxy
-
-
-tar -xzf build-x86_64.tar.gz
-tar -xzf build-osx-arm64.tar.gz
 
 g++ -std=c++17 -lwolfssl -lsqlite3 -o secure_http_client -c xios.cpp \
     -I build_x86_64/include \
