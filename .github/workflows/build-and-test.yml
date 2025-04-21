@@ -3,6 +3,9 @@ name: Build and Test xios node module
 run-name: Build and Test xios node module
 on: [push]
 
+env:
+    GH_TOKEN: ${{ github.token }}
+
 jobs:
   build-and-test:
     runs-on: ubuntu-latest
