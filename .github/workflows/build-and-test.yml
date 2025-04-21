@@ -16,12 +16,12 @@ jobs:
       - name: Install libwolfssl-dev
         run: |
           sudo apt-get update
-          sudo apt-get -y install libwolfssl-dev
+          sudo apt-get -y install libwolfssl-dev gh
 
-      - name: Set up Python venv
+      - name: Set up node environment
         run: |
-          npm i node-addon-api
-          npm i node-gyp
+          npm i -g node-addon-api
+          npm i -g node-gyp
 
       - name: Set up Python venv
         run: |
