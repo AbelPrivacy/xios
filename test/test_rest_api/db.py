@@ -1,16 +1,14 @@
-from sqlalchemy import create_engine
-
-engine = create_engine(
-    "sqlite:///test_db.db"
-)
-
-from sqlalchemy import Column, String, DateTime, BLOB
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import Session
 from datetime import datetime
 from uuid import uuid4
 
+from sqlalchemy import BLOB, Column, DateTime, String, create_engine
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import Session
+
+engine = create_engine("sqlite:///test_db.db")
+
 Base = declarative_base()
+
 
 class request(Base):
     __tablename__ = "request"
@@ -30,6 +28,7 @@ class request(Base):
 
     def __str__(self):
         return f"request: {self.request_id.hex()}, {self.http_method}, {self.timestamp}"
+
 
 Base.metadata.drop_all(engine)
 Base.metadata.create_all(engine)

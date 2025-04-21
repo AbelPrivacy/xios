@@ -1,14 +1,14 @@
 from flask import Flask
 
-
 app = Flask(__name__)
 
 
-@app.route("/request/", methods=['GET'])
+@app.route("/request/", methods=["GET"])
 def get_request():
     return "GET /requests/"
 
-@app.route("/request/", methods=['POST'])
+
+@app.route("/request/", methods=["POST"])
 def post_request():
     return "POST /requests/"
 

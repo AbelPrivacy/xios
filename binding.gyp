@@ -2,7 +2,7 @@
   "targets": [
     {
       "target_name": "secure_http_client",
-      "sources": [ "secure_http_client_napi.cpp", "xios.cpp" ],
+      "sources": [ "secure_http_client_napi.cpp", "src/xios.cpp" ],
       "include_dirs": [
         "<!(node -p \"require('node-addon-api').include\")",
         "/Users/dir/homebrew/Cellar/wolfssl/5.7.6/include",

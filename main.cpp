@@ -1,25 +1,24 @@
-#include "xios.hpp"
 #include <iostream>
-#include <vector>
 #include <string>
+#include <vector>
+
+#include "src/xios.hpp"
 
 int main() {
     try {
         // Define security policy
         std::string sqlitePath = "metadata.db";
         std::vector<std::string> allowedProtocols = {"TLSv1.3"};
-        std::vector<std::string> allowedImplementations = {"TLS13-AES256-GCM-SHA384"};
+        std::vector<std::string> allowedImplementations = {
+            "TLS13-AES256-GCM-SHA384"};
         std::vector<std::string> blockedImplementations = {};
-        std::vector<std::string> allowedGroups = {}; // Optional: e.g., {"KYBER_LEVEL1"}
+        std::vector<std::string> allowedGroups =
+            {};  // Optional: e.g., {"KYBER_LEVEL1"}
 
         // Initialize the HTTP client
-        SecureHttpClient::initialize(
-            sqlitePath,
-            allowedProtocols,
-            allowedImplementations,
-            blockedImplementations,
-            allowedGroups
-        );
+        SecureHttpClient::initialize(sqlitePath, allowedProtocols,
+                                     allowedImplementations,
+                                     blockedImplementations, allowedGroups);
 
         std::cout << "Making GET request...\n";
         // Perform GET request

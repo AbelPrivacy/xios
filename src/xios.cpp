@@ -1,18 +1,17 @@
 #include "xios.hpp"
 
+#include <netdb.h>
+#include <sqlite3.h>
+#include <unistd.h>
 #include <wolfssl/options.h>
 #include <wolfssl/ssl.h>
 #include <wolfssl/wolfcrypt/settings.h>
-#include <sqlite3.h>
 
-#include <iostream>
-#include <sstream>
 #include <cstring>
-#include <stdexcept>
-#include <netdb.h>
-#include <unistd.h>
+#include <iostream>
 #include <regex>
-
+#include <sstream>
+#include <stdexcept>
 
 std::string SecureHttpClient::s_sqlitePath;
 std::vector<std::string> SecureHttpClient::s_allowedProtocols;
@@ -20,12 +19,11 @@ std::vector<std::string> SecureHttpClient::s_allowedGroups;
 std::vector<std::string> SecureHttpClient::s_allowedImplementations;
 std::vector<std::string> SecureHttpClient::s_blockedImplementations;
 
-
-void SecureHttpClient::initialize(std::string& sqlitePath,
-                                  std::vector<std::string>& allowedProtocols,
-                                  std::vector<std::string>& allowedImplementations,
-                                  std::vector<std::string>& blockedImplementations,
-                                  std::vector<std::string>& allowedGroups) {
+void SecureHttpClient::initialize(
+    std::string& sqlitePath, std::vector<std::string>& allowedProtocols,
+    std::vector<std::string>& allowedImplementations,
+    std::vector<std::string>& blockedImplementations,
+    std::vector<std::string>& allowedGroups) {
     s_allowedProtocols = allowedProtocols;
     s_allowedImplementations = allowedImplementations;
     s_blockedImplementations = blockedImplementations;
@@ -36,9 +34,7 @@ void SecureHttpClient::initialize(std::string& sqlitePath,
     initSQLite(sqlitePath);
 }
 
-void SecureHttpClient::initWolfSSL() {
-    wolfSSL_Init();
-}
+void SecureHttpClient::initWolfSSL() { wolfSSL_Init(); }
 
 void SecureHttpClient::initSQLite(const std::string& path) {
     sqlite3* db;
@@ -49,10 +45,12 @@ void SecureHttpClient::initSQLite(const std::string& path) {
     const char* createTableSQL =
         "CREATE TABLE IF NOT EXISTS ConnectionMetadata ("
         "id INTEGER PRIMARY KEY AUTOINCREMENT, "
-        "host TEXT, protocol TEXT, implementation TEXT, key_exchange TEXT, timestamp DATETIME DEFAULT CURRENT_TIMESTAMP);";
+        "host TEXT, protocol TEXT, implementation TEXT, key_exchange TEXT, "
+        "timestamp DATETIME DEFAULT CURRENT_TIMESTAMP);";
 
     char* errMsg = nullptr;
-    if (sqlite3_exec(db, createTableSQL, nullptr, nullptr, &errMsg) != SQLITE_OK) {
+    if (sqlite3_exec(db, createTableSQL, nullptr, nullptr, &errMsg) !=
+        SQLITE_OK) {
         std::string err = errMsg;
         sqlite3_free(errMsg);
         sqlite3_close(db);
@@ -71,23 +69,29 @@ void SecureHttpClient::applyProtocolRestrictions(WOLFSSL_CTX* ctx) {
     options |= WOLFSSL_OP_NO_TLSv1_2;
     options |= WOLFSSL_OP_NO_TLSv1_3;
 
-    for (const std::string& proto : SecureHttpClient::s_allowedProtocols) {
-        if (proto == "TLSv1.2") {
+    auto lambda = [&options](const char* proto) {
+        if (std::strcmp(proto, "TLSv1.2") == 0) {
             options &= ~WOLFSSL_OP_NO_TLSv1_2;
-        } else if (proto == "TLSv1.3") {
+        } else if (std::strcmp(proto, "TLSv1.3") == 0) {
             options &= ~WOLFSSL_OP_NO_TLSv1_3;
-        } else if (proto == "TLSv1.1") {
+        } else if (std::strcmp(proto, "TLSv1.1") == 0) {
             options &= ~WOLFSSL_OP_NO_TLSv1_1;
-        } else if (proto == "TLSv1") {
+        } else if (std::strcmp(proto, "TLSv1") == 0) {
             options &= ~WOLFSSL_OP_NO_TLSv1;
         }
+    };
+
+    for (const std::string& proto : SecureHttpClient::s_allowedProtocols) {
+        lambda(proto.c_str());
     }
 
     // Apply cipher suite allowlist/blocklist
     if (!s_allowedImplementations.empty()) {
         std::stringstream cipherList;
         for (const std::string& cipher : s_allowedImplementations) {
-            if (std::find(s_blockedImplementations.begin(), s_blockedImplementations.end(), cipher) == s_blockedImplementations.end()) {
+            if (std::find(s_blockedImplementations.begin(),
+                          s_blockedImplementations.end(),
+                          cipher) == s_blockedImplementations.end()) {
                 cipherList << cipher << ":";
             }
         }
@@ -97,7 +101,8 @@ void SecureHttpClient::applyProtocolRestrictions(WOLFSSL_CTX* ctx) {
             finalCipherList.pop_back();  // remove trailing ':'
         }
 
-        if (wolfSSL_CTX_set_cipher_list(ctx, finalCipherList.c_str()) != WOLFSSL_SUCCESS) {
+        if (wolfSSL_CTX_set_cipher_list(ctx, finalCipherList.c_str()) !=
+            WOLFSSL_SUCCESS) {
             wolfSSL_CTX_free(ctx);
             throw std::runtime_error("Failed to set cipher list");
         }
@@ -107,7 +112,8 @@ void SecureHttpClient::applyProtocolRestrictions(WOLFSSL_CTX* ctx) {
     //     word16 groupId = mapGroupNameToId(group);
     //     if (wolfSSL_CTX_UseSupportedCurve(ctx, groupId) != WOLFSSL_SUCCESS) {
     //         wolfSSL_CTX_free(ctx);
-    //         throw std::runtime_error("Failed to apply supported group: " + group);
+    //         throw std::runtime_error("Failed to apply supported group: " +
+    //         group);
     //     }
     // }
 
@@ -122,7 +128,8 @@ void SecureHttpClient::logConnectionMetadata(const std::string& host,
     sqlite3_open(s_sqlitePath.c_str(), &db);
 
     std::stringstream ss;
-    ss << "INSERT INTO ConnectionMetadata (host, protocol, implementation, key_exchange) VALUES ("
+    ss << "INSERT INTO ConnectionMetadata (host, protocol, implementation, "
+          "key_exchange) VALUES ("
        << "'" << host << "', "
        << "'" << protocol << "', "
        << "'" << tlsImpl << "', "
@@ -136,14 +143,19 @@ void SecureHttpClient::logConnectionMetadata(const std::string& host,
 }
 
 bool SecureHttpClient::isProtocolAllowed(const std::string& protocol) {
-    return std::find(s_allowedProtocols.begin(), s_allowedProtocols.end(), protocol) != s_allowedProtocols.end();
+    return std::find(s_allowedProtocols.begin(), s_allowedProtocols.end(),
+                     protocol) != s_allowedProtocols.end();
 }
 
 bool SecureHttpClient::isImplementationAllowed(const std::string& impl) {
-    if (std::find(s_blockedImplementations.begin(), s_blockedImplementations.end(), impl) != s_blockedImplementations.end())
+    if (std::find(s_blockedImplementations.begin(),
+                  s_blockedImplementations.end(),
+                  impl) != s_blockedImplementations.end())
         return false;
     return s_allowedImplementations.empty() ||
-           std::find(s_allowedImplementations.begin(), s_allowedImplementations.end(), impl) != s_allowedImplementations.end();
+           std::find(s_allowedImplementations.begin(),
+                     s_allowedImplementations.end(),
+                     impl) != s_allowedImplementations.end();
 }
 
 std::string SecureHttpClient::parseHost(std::string url) {
@@ -158,7 +170,8 @@ std::string SecureHttpClient::parsePath(std::string url) {
 }
 
 ParsedURL SecureHttpClient::parseURL(std::string url) {
-    std::regex urlRegex(R"(^(?:(https?)://)?([^:/]+|\d{1,3}(?:\.\d{1,3}){3})(?::(\d+))?(\/.*)?$)");
+    std::regex urlRegex(
+        R"(^(?:(https?)://)?([^:/]+|\d{1,3}(?:\.\d{1,3}){3})(?::(\d+))?(\/.*)?$)");
     std::smatch match;
 
     if (!std::regex_match(url, match, urlRegex)) {
@@ -169,29 +182,28 @@ ParsedURL SecureHttpClient::parseURL(std::string url) {
     result.scheme = match[1].matched ? match[1].str() : "https";
     result.host = match[2].str();
     result.port = match[3].matched
-                    ? static_cast<uint16_t>(std::stoi(match[3].str()))
-                    : (result.scheme == "http" ? 80 : 443);
+                      ? static_cast<uint16_t>(std::stoi(match[3].str()))
+                      : (result.scheme == "http" ? 80 : 443);
     result.path = match[4].matched ? match[4].str() : "/";
 
     return result;
 }
 
-std::tuple<WOLFSSL*,
-           WOLFSSL_CTX*,
-           int,
-           ParsedURL,
-           const char*,
-           const char*,
+std::tuple<WOLFSSL*, WOLFSSL_CTX*, int, ParsedURL, const char*, const char*,
            const char*>
-           SecureHttpClient::prepare_for_request(std::string url) {
-
+SecureHttpClient::prepare_for_request(std::string url) {
     auto parsedURL = SecureHttpClient::parseURL(url);
 
     // Use highest allowed protocol
     WOLFSSL_METHOD* method = nullptr;
-    if (std::find(SecureHttpClient::s_allowedProtocols.begin(), SecureHttpClient::s_allowedProtocols.end(), "TLSv1.3") != SecureHttpClient::s_allowedProtocols.end()) {
+    if (std::find(SecureHttpClient::s_allowedProtocols.begin(),
+                  SecureHttpClient::s_allowedProtocols.end(),
+                  "TLSv1.3") != SecureHttpClient::s_allowedProtocols.end()) {
         method = const_cast<WOLFSSL_METHOD*>(wolfTLSv1_3_client_method());
-    } else if (std::find(SecureHttpClient::s_allowedProtocols.begin(), SecureHttpClient::s_allowedProtocols.end(), "TLSv1.2") != SecureHttpClient::s_allowedProtocols.end()) {
+    } else if (std::find(SecureHttpClient::s_allowedProtocols.begin(),
+                         SecureHttpClient::s_allowedProtocols.end(),
+                         "TLSv1.2") !=
+               SecureHttpClient::s_allowedProtocols.end()) {
         method = const_cast<WOLFSSL_METHOD*>(wolfTLSv1_2_client_method());
     } else {
         throw std::runtime_error("No supported protocol in allowlist");
@@ -227,25 +239,24 @@ std::tuple<WOLFSSL*,
 
     const char* cipher = wolfSSL_get_cipher_name(ssl);
     const char* protocol = wolfSSL_get_version(ssl);
-    const char* keGroup = wolfSSL_get_curve_name(ssl); // placeholder for KEM/DHE/EC info
+    const char* keGroup =
+        wolfSSL_get_curve_name(ssl);  // placeholder for KEM/DHE/EC info
 
-    if (!SecureHttpClient::isProtocolAllowed(protocol) || !SecureHttpClient::isImplementationAllowed(cipher)) {
+    if (!SecureHttpClient::isProtocolAllowed(protocol) ||
+        !SecureHttpClient::isImplementationAllowed(cipher)) {
         wolfSSL_free(ssl);
         wolfSSL_CTX_free(ctx);
         close(sockfd);
         throw std::runtime_error("Protocol or Implementation not allowed");
-    } 
-    return std::make_tuple(ssl, ctx, sockfd, parsedURL, protocol, cipher, keGroup);
+    }
+    return std::make_tuple(ssl, ctx, sockfd, parsedURL, protocol, cipher,
+                           keGroup);
 }
 
 std::string SecureHttpClient::make_request(std::string url, std::string req) {
-    std::tuple<WOLFSSL*,
-           WOLFSSL_CTX*,
-           int,
-           ParsedURL,
-           const char*,
-           const char*,
-           const char*> request_prep = prepare_for_request(url);
+    std::tuple<WOLFSSL*, WOLFSSL_CTX*, int, ParsedURL, const char*, const char*,
+               const char*>
+        request_prep = prepare_for_request(url);
 
     WOLFSSL* ssl = std::get<0>(request_prep);
     WOLFSSL_CTX* ctx = std::get<1>(request_prep);
@@ -265,7 +276,8 @@ std::string SecureHttpClient::make_request(std::string url, std::string req) {
         response << buffer;
     }
 
-    logConnectionMetadata(parsedURL.host, protocol, cipher, keGroup ? keGroup : "N/A");
+    logConnectionMetadata(parsedURL.host, protocol, cipher,
+                          keGroup ? keGroup : "N/A");
 
     wolfSSL_free(ssl);
     wolfSSL_CTX_free(ctx);
@@ -275,7 +287,6 @@ std::string SecureHttpClient::make_request(std::string url, std::string req) {
 }
 
 std::string SecureHttpClient::get(std::string url) {
-
     auto parsedURL = SecureHttpClient::parseURL(url);
 
     std::stringstream req;
@@ -284,10 +295,10 @@ std::string SecureHttpClient::get(std::string url) {
         << "Connection: close\r\n\r\n";
 
     return make_request(url, req.str());
-    
 }
 
-std::string SecureHttpClient::post(std::string url, const std::string& payload) {
+std::string SecureHttpClient::post(std::string url,
+                                   const std::string& payload) {
     // Similar to GET, adjust request to POST with headers and body
     throw std::runtime_error("POST not implemented yet in this snippet");
 }

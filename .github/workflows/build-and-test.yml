@@ -1,10 +1,9 @@
----
 name: Build and Test xios node module
 run-name: Build and Test xios node module
 on: [push]
 
 env:
-    GH_TOKEN: ${{ github.token }}
+  GH_TOKEN: ${{ github.token }}
 
 jobs:
   build-and-test:
@@ -14,7 +13,7 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: "20"
 
       - name: Install libwolfssl-dev
         run: |
@@ -35,4 +34,3 @@ jobs:
       - name: Build native module
         run: |
           source ./build.sh
-

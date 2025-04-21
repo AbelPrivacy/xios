@@ -1,24 +1,21 @@
 #include "test_get.h"
-#include <iostream>
 
+#include <iostream>
 
 using namespace std;
 
 void testGet() {
-    std::string db =  "./metadata.db";
+    std::string db = "./metadata.db";
     std::vector<std::string> proto;
     proto.push_back("TLSv1.3");
     std::vector<std::string> empty0;
     std::vector<std::string> empty1;
     std::vector<std::string> empty2;
-    SecureHttpClient::initialize(
-      db,
-      proto,
-      empty0,
-      empty1,
-      empty2 // or ['KYBER_LEVEL1'] if supported
+    SecureHttpClient::initialize(db, proto, empty0, empty1,
+                                 empty2  // or ['KYBER_LEVEL1'] if supported
     );
-    std::string response = SecureHttpClient::get("https://localhost:1443/request/");
+    std::string response =
+        SecureHttpClient::get("https://localhost:1443/request/");
     std::cout << "Response: " << response << "\n";
     assert(response.find("HTTP/1.1 200 OK") == 0);
     // assert(response.find("Server: Werkzeug/3.1.3 Python/3.13.3") != -1);
