@@ -1,6 +1,5 @@
 #include "test_parseURL.h"
 
-
 void testParseURL() {
     {
         auto p = SecureHttpClient::parseURL("https://example.com");
@@ -43,7 +42,8 @@ void testParseURL() {
     }
 
     {
-        auto p = SecureHttpClient::parseURL("https://example.com:8443/path/to/resource");
+        auto p = SecureHttpClient::parseURL(
+            "https://example.com:8443/path/to/resource");
         assert(p.scheme == "https");
         assert(p.host == "example.com");
         assert(p.port == 8443);
@@ -75,7 +75,8 @@ void testParseURL() {
     }
 
     {
-        auto p = SecureHttpClient::parseURL("www.example.com:11235/some/endpoint");
+        auto p =
+            SecureHttpClient::parseURL("www.example.com:11235/some/endpoint");
         assert(p.scheme == "https");
         assert(p.host == "www.example.com");
         assert(p.port == 11235);

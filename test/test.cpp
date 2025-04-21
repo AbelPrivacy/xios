@@ -1,5 +1,5 @@
-#include "test_parseURL.h"
 #include "test_get.h"
+#include "test_parseURL.h"
 
 int main() {
     testParseURL();

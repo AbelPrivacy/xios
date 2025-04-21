@@ -8,3 +8,8 @@ xios_driver
 .DS_STORE
 run_tests
 venv
+build*
+util/reverse-https-proxy
+*log
+test_server
+*pyc

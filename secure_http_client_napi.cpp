@@ -1,5 +1,7 @@
 #include <napi.h>
+
 #include <iostream>
+
 #include "src/xios.hpp"
 
 using namespace Napi;
@@ -15,15 +17,15 @@ std::vector<std::string> JsArrayToStringVector(const Array& jsArray) {
     return vec;
 }
 
-// JS: SecureHttpClient.initialize(sqlitePath, allowedProtocols, allowedCiphers, blockedCiphers, allowedGroups)
+// JS: SecureHttpClient.initialize(sqlitePath, allowedProtocols, allowedCiphers,
+// blockedCiphers, allowedGroups)
 void InitializeWrapped(const CallbackInfo& info) {
     Env env = info.Env();
     try {
-
-        if (info.Length() != 5 || !info[0].IsString() ||
-            !info[1].IsArray() || !info[2].IsArray() ||
-            !info[3].IsArray() || !info[4].IsArray()) {
-            std::cerr << "Expected (string, array, array, array, array)" << std::endl;
+        if (info.Length() != 5 || !info[0].IsString() || !info[1].IsArray() ||
+            !info[2].IsArray() || !info[3].IsArray() || !info[4].IsArray()) {
+            std::cerr << "Expected (string, array, array, array, array)"
+                      << std::endl;
         }
 
         std::string sqlitePath = info[0].As<String>().Utf8Value();
@@ -32,7 +34,9 @@ void InitializeWrapped(const CallbackInfo& info) {
         auto blockedCiphers = JsArrayToStringVector(info[3].As<Array>());
         auto allowedGroups = JsArrayToStringVector(info[4].As<Array>());
 
-        SecureHttpClient::initialize(sqlitePath, allowedProtocols, allowedCiphers, blockedCiphers, allowedGroups);
+        SecureHttpClient::initialize(sqlitePath, allowedProtocols,
+                                     allowedCiphers, blockedCiphers,
+                                     allowedGroups);
     } catch (const std::exception& e) {
         throw Napi::Error::New(env, e.what());
     } catch (...) {
@@ -44,16 +48,15 @@ void InitializeWrapped(const CallbackInfo& info) {
 Value GetWrapped(const CallbackInfo& info) {
     Env env = info.Env();
     try {
-    
         if (info.Length() != 1 || !info[0].IsString()) {
             std::cerr << "Expected (string)" << std::endl;
         }
-    
+
         std::string url = info[0].As<String>().Utf8Value();
         std::string result;
-    
+
         result = SecureHttpClient::get(url);
-    
+
         return String::New(env, result);
     } catch (const std::exception& e) {
         throw Napi::Error::New(env, e.what());
