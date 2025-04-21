@@ -1,11 +1,11 @@
+from datetime import datetime
+from uuid import uuid4
+
 from sqlalchemy import BLOB, Column, DateTime, String, create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import Session
 
 engine = create_engine("sqlite:///test_db.db")
-
-from datetime import datetime
-from uuid import uuid4
 
 Base = declarative_base()
 
