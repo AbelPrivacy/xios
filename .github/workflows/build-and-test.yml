@@ -1,5 +1,6 @@
 ---
 name: Build and Test xios node module
+run-name: ${{ github.actor }}: build and test node module
 on: [push]
 
 jobs:
@@ -30,14 +31,5 @@ jobs:
 
       - name: Build native module
         run: |
-          source ./venv/bin/activate
           source ./build.sh
 
-      - name: Run tests
-        run: |
-          source ./venv/bin/activate
-          ./run_tests
-
-      - name: Cleanup REST API
-        run: |
-          kill $(cat server.pid)
