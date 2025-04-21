@@ -13,10 +13,10 @@ jobs:
         with:
           node-version: '20'
 
-      - name: Install libwolfssl-dev and sqlite
+      - name: Install libwolfssl-dev
         run: |
           sudo apt-get update
-          sudo apt-get -y install libwolfssl-dev sqlite
+          sudo apt-get -y install libwolfssl-dev
 
       - name: Set up Python venv
         run: |
