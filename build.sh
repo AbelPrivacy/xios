@@ -77,7 +77,7 @@ echo 'y' | npx node-gyp configure build
 source ./venv/bin/activate
 
 echo "Starting proxy server..."
-./util/reverse-https-proxy 127.0.0.1 8080 443 > proxy.log 2>&1 &
+sudo ./util/reverse-https-proxy 127.0.0.1 8080 443 > proxy.log 2>&1 &
 PROXY_PID=$!
 sleep 2  # Wait for proxy to start
 
