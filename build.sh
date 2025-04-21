@@ -3,17 +3,17 @@
 rm -rf build_bak
 mkdir build_bak
 
-cp *.o ./build_bak || :
-cp *.so ./build_bak || :
-cp *.a ./build_bak || :
-cp *.dylib ./build_bak || :
+cp ./*.o ./build_bak || :
+cp ./*.so ./build_bak || :
+cp ./*.a ./build_bak || :
+cp ./*.dylib ./build_bak || :
 
 cp -r build ./build_bak/build || :
 
-rm -f *.o
-rm -f *.so
-rm -f *.a
-rm -f *.dylib
+rm -f ./*.o
+rm -f ./*.so
+rm -f ./*.a
+rm -f ./*.dylib
 
 rm -f metadata.db
 
