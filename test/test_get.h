@@ -1,6 +1,6 @@
 #include <cassert>
 #include <iostream>
-#include "../xios.hpp"
+#include "../src/xios.hpp"
 
 
 void testGet();

@@ -31,7 +31,7 @@ g++ --std=c++20 ./util/reverse-https-proxy.cpp -I ~/homebrew/include/ \
     -I build-osx-arm64/wolfssl \
     -L build-osx-arm64/lib -lwolfssl -o ./util/reverse-https-proxy
 
-g++ -std=c++17 -lwolfssl -lsqlite3 -o secure_http_client -c xios.cpp \
+g++ -std=c++17 -lwolfssl -lsqlite3 -o secure_http_client -c src/xios.cpp \
     -I build_x86_64/include \
     -L build_x86_64/lib \
     -I build-osx-arm64/wolfssl \
