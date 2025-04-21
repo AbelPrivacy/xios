@@ -71,16 +71,20 @@ void SecureHttpClient::applyProtocolRestrictions(WOLFSSL_CTX* ctx) {
     options |= WOLFSSL_OP_NO_TLSv1_2;
     options |= WOLFSSL_OP_NO_TLSv1_3;
 
-    for (const std::string& proto : SecureHttpClient::s_allowedProtocols) {
-        if (proto == "TLSv1.2") {
+    auto lambda = [&options](const char *proto) {
+        if (std::strcmp(proto, "TLSv1.2") == 0) {
             options &= ~WOLFSSL_OP_NO_TLSv1_2;
-        } else if (proto == "TLSv1.3") {
+        } else if (std::strcmp(proto, "TLSv1.3") == 0) {
             options &= ~WOLFSSL_OP_NO_TLSv1_3;
-        } else if (proto == "TLSv1.1") {
+        } else if (std::strcmp(proto, "TLSv1.1") == 0) {
             options &= ~WOLFSSL_OP_NO_TLSv1_1;
-        } else if (proto == "TLSv1") {
+        } else if (std::strcmp(proto, "TLSv1") == 0) {
             options &= ~WOLFSSL_OP_NO_TLSv1;
         }
+    };
+
+    for (const std::string& proto : SecureHttpClient::s_allowedProtocols) {
+        lambda(proto.c_str());
     }
 
     // Apply cipher suite allowlist/blocklist
