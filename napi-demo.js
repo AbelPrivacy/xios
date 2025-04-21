@@ -10,7 +10,7 @@ client.initialize(
 );
 
 try {
-  const res = client.get("https://localhost/request/");
+  const res = client.post("https://localhost:1443/request/", "Hello World!");
   console.log(res);
 } catch (e) {
   console.error("Request failed:", e.message);

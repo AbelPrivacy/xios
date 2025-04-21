@@ -158,18 +158,18 @@ bool SecureHttpClient::isImplementationAllowed(const std::string& impl) {
                      impl) != s_allowedImplementations.end();
 }
 
-std::string SecureHttpClient::parseHost(std::string url) {
+std::string SecureHttpClient::parseHost(const std::string url) {
     size_t start = url.find("://") + 3;
     size_t end = url.find("/", start);
     return url.substr(start, end - start);
 }
 
-std::string SecureHttpClient::parsePath(std::string url) {
+std::string SecureHttpClient::parsePath(const std::string url) {
     size_t pathStart = url.find('/', url.find("://") + 3);
     return pathStart != std::string::npos ? url.substr(pathStart) : "/";
 }
 
-ParsedURL SecureHttpClient::parseURL(std::string url) {
+ParsedURL SecureHttpClient::parseURL(const std::string url) {
     std::regex urlRegex(
         R"(^(?:(https?)://)?([^:/]+|\d{1,3}(?:\.\d{1,3}){3})(?::(\d+))?(\/.*)?$)");
     std::smatch match;
@@ -191,7 +191,7 @@ ParsedURL SecureHttpClient::parseURL(std::string url) {
 
 std::tuple<WOLFSSL*, WOLFSSL_CTX*, int, ParsedURL, const char*, const char*,
            const char*>
-SecureHttpClient::prepare_for_request(std::string url) {
+SecureHttpClient::prepare_for_request(const std::string url) {
     auto parsedURL = SecureHttpClient::parseURL(url);
 
     // Use highest allowed protocol
@@ -253,7 +253,8 @@ SecureHttpClient::prepare_for_request(std::string url) {
                            keGroup);
 }
 
-std::string SecureHttpClient::make_request(std::string url, std::string req) {
+std::string SecureHttpClient::make_request(const std::string url,
+                                           std::string req) {
     std::tuple<WOLFSSL*, WOLFSSL_CTX*, int, ParsedURL, const char*, const char*,
                const char*>
         request_prep = prepare_for_request(url);
@@ -286,7 +287,7 @@ std::string SecureHttpClient::make_request(std::string url, std::string req) {
     return response.str();
 }
 
-std::string SecureHttpClient::get(std::string url) {
+std::string SecureHttpClient::get(const std::string url) {
     auto parsedURL = SecureHttpClient::parseURL(url);
 
     std::stringstream req;
@@ -297,10 +298,19 @@ std::string SecureHttpClient::get(std::string url) {
     return make_request(url, req.str());
 }
 
-std::string SecureHttpClient::post(std::string url,
+std::string SecureHttpClient::post(const std::string url,
                                    const std::string& payload) {
-    // Similar to GET, adjust request to POST with headers and body
-    throw std::runtime_error("POST not implemented yet in this snippet");
+    auto parsedURL = SecureHttpClient::parseURL(url);
+
+    std::stringstream req;
+    req << "POST " << parsedURL.path << " HTTP/1.1\r\n"
+        << "Host: " << parsedURL.host << "\r\n"
+        << "Connection: close\r\n\r\n"
+        << "Content-Type: application/json\r\n"
+        << "Content-Length: " << payload.length() << "\r\n\r\n"
+        << payload;
+
+    return make_request(url, req.str());
 }
 
 // Map human-readable PQC group names to wolfSSL internal IDs

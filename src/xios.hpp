@@ -33,14 +33,14 @@ class SecureHttpClient {
                            std::vector<std::string>& allowedGroups);
     static std::tuple<WOLFSSL*, WOLFSSL_CTX*, int, ParsedURL, const char*,
                       const char*, const char*>
-    prepare_for_request(std::string url);
-    static std::string make_request(std::string url, std::string req);
-    static std::string get(std::string url);
-    static std::string post(std::string url, const std::string& payload);
+    prepare_for_request(const std::string url);
+    static std::string make_request(const std::string url, std::string req);
+    static std::string get(const std::string url);
+    static std::string post(const std::string url, const std::string& payload);
 
-    static std::string parseHost(std::string url);
-    static std::string parsePath(std::string url);
-    static ParsedURL parseURL(std::string url);
+    static std::string parseHost(const std::string url);
+    static std::string parsePath(const std::string url);
+    static ParsedURL parseURL(const std::string url);
 
    private:
     static void initWolfSSL();

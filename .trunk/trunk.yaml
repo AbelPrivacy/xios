@@ -25,13 +25,13 @@ lint:
     - actionlint@1.7.7
     - bandit@1.8.3
     - black@25.1.0
-    - checkov@3.2.405
-    - eslint@9.24.0
+    - checkov@3.2.407
+    - eslint@9.25.0
     - git-diff-check
     - isort@6.0.1
     - markdownlint@0.44.0
     - osv-scanner@2.0.1
-    - ruff@0.11.5
+    - ruff@0.11.6
     - shellcheck@0.10.0
     - shfmt@3.6.0
     - trufflehog@3.88.24
