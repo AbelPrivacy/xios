@@ -136,21 +136,10 @@ void SecureHttpClient::logConnectionMetadata(const std::string& host,
 }
 
 bool SecureHttpClient::isProtocolAllowed(const std::string& protocol) {
-    std::cout << protocol << std::endl;
-    for (auto proto : s_allowedProtocols) {
-        std::cout << proto << std::endl;
-    }
     return std::find(s_allowedProtocols.begin(), s_allowedProtocols.end(), protocol) != s_allowedProtocols.end();
 }
 
 bool SecureHttpClient::isImplementationAllowed(const std::string& impl) {
-    std::cout << impl << std::endl;
-    for (auto impl : s_blockedImplementations) {
-        std::cout << impl << std::endl;
-    }
-    for (auto impl : s_allowedImplementations) {
-        std::cout << impl << std::endl;
-    }
     if (std::find(s_blockedImplementations.begin(), s_blockedImplementations.end(), impl) != s_blockedImplementations.end())
         return false;
     return s_allowedImplementations.empty() ||

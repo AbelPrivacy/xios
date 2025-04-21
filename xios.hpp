@@ -9,6 +9,7 @@ g++ -std=c++17 -lwolfssl -lsqlite3 -o secure_http_client -c xios.cpp -I ~/homebr
 #include <vector>
 #include <map>
 #include <utility>
+#include <cstdint>
 
 
 typedef struct WOLFSSL_CTX WOLFSSL_CTX;

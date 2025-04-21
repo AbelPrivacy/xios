@@ -1,0 +1,52 @@
+name: Build and Test xios node module
+on: [push]
+
+jobs:
+  build-and-test:
+    runs-on: self-hosted
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Configure homebrew
+        run: |
+          eval "$(!~/homebrew/bin/brew shellenv)"
+
+      - name: Install wolfssl
+        run: |
+          /Users/dir/homebrew/bin/brew install wolfssl sqlite
+
+      - name: Set up Python venv
+        run: |
+          npm i node-addon-api
+          npm i node-gyp
+
+      - name: Set up Python venv
+        run: |
+          python3 -m venv venv
+          source ./venv/bin/activate
+          pip install -r requirements.txt
+
+      - name: Start REST API in background
+        run: |
+          source ./venv/bin/activate
+          nohup python3 ./test/test_rest_api/app.py > server.log &
+          echo $! > server.pid
+          sleep 5  # wait for the server to become responsive
+
+      - name: Build native module
+        run: |
+          source ./venv/bin/activate
+          source ./build.sh
+
+      - name: Run tests
+        run: |
+          source ./venv/bin/activate
+          ./run_tests
+
+      - name: Cleanup REST API
+        run: |
+          kill $(cat server.pid)
