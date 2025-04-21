@@ -1,6 +1,6 @@
 ---
 name: Build and Test xios node module
-run-name: ${{ github.actor }}: build and test node module
+run-name: Build and Test xios node module
 on: [push]
 
 jobs:
