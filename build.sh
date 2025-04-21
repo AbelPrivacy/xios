@@ -24,8 +24,8 @@ g++ --std=c++20 ./util/reverse-https-proxy.cpp -I ~/homebrew/include/ -L ~/homeb
 
 gh release download PQC-Release --repo AbelPrivacy/wolfssl
 
-tar -xzvf build-x86_64.tar.gz
-tar -xzvf build-osx-arm64.tar.gz
+tar -xzf build-x86_64.tar.gz
+tar -xzf build-osx-arm64.tar.gz
 
 g++ -std=c++17 -lwolfssl -lsqlite3 -o secure_http_client -c xios.cpp \
     -I build_x86_64/include \
@@ -77,7 +77,7 @@ echo 'y' | npx node-gyp configure build
 source ./venv/bin/activate
 
 echo "Starting proxy server..."
-sudo ./util/reverse-https-proxy 127.0.0.1 8080 443 > proxy.log 2>&1 &
+./util/reverse-https-proxy 127.0.0.1 8080 443 > proxy.log 2>&1 &
 PROXY_PID=$!
 sleep 2  # Wait for proxy to start
 
