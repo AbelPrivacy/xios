@@ -2,7 +2,7 @@
 
 echo "Cleaning up old build artifacts..."
 
-rm -rf build_bak
+rm -rf build_bak > /dev/null
 mkdir build_bak
 
 cp ./*.o ./build_bak || :
@@ -12,15 +12,15 @@ cp ./*.dylib ./build_bak || :
 
 cp -r build ./build_bak/build || :
 
-rm -f ./*.o
-rm -f ./*.so
-rm -f ./*.a
-rm -f ./*.dylib
+rm -f ./*.o > /dev/null
+rm -f ./*.so > /dev/null
+rm -f ./*.a > /dev/null
+rm -f ./*.dylib > /dev/null
 
-rm -f metadata.db
+rm -f metadata.db > /dev/null
 
-rm -f run_tests
-rm -f xios_driver
+rm -f run_tests > /dev/null
+rm -f xios_driver > /dev/null
 
 # Find Node.js include path from NVM
 NODE_INCLUDE_PATH=$(find "$HOME/.nvm/versions/node" -type d -path "*/include/node" | head -n 1)
@@ -47,14 +47,15 @@ echo "Building reverse https proxy..."
 
 g++ --std=c++20 -c ./util/reverse-https-proxy.cpp \
 	-L lib -I include -I include/wolfssl \
-	-lwolfssl -fcxx-exceptions -pthread
+	-lwolfssl -fcxx-exceptions -pthread > reverse-https-proxy.o.log
 
 g++ --std=c++20 ./reverse-https-proxy.o  \
 	--target=arm64-apple-darwin \
 	-Llib -lwolfssl \
 	-Iinclude \
 	-o ./util/reverse-https-proxy \
-	-fcxx-exceptions -pthread 
+	-fcxx-exceptions -pthread \
+    -framework CoreFoundation -framework Security > reverse-https-proxy.log
 
 echo "Building xios library..."
 
@@ -67,15 +68,22 @@ g++ -std=c++20 \
 	--target=arm64-apple-darwin \
 	secure_http_client_napi.cpp \
 	./test/catch2/src/catch_amalgamated.cpp \
-	-fcxx-exceptions -pthread -static
+	-fcxx-exceptions -pthread -static > xios.o.log
 	
+rm -rf ./lib/libwolfssl.a.dir/
+mkdir ./lib/libwolfssl.a.dir/
+cp lib/libwolfssl.a ./lib/libwolfssl.a.dir/
 
-ar rvs ./lib/libxios.a xios.o catch_amalgamated.o secure_http_client_napi.o lib/sqlite3.o lib/libwolfssl.a
+cd ./lib/libwolfssl.a.dir/
+ar x libwolfssl.a
+cd ../../
+
+ar rvs ./lib/libxios.a xios.o catch_amalgamated.o secure_http_client_napi.o lib/sqlite3.o ./lib/libwolfssl.a.dir/*.o > xios.a.log
 
 echo "Building test driver..."
 
 g++ -std=c++20 ./test/test_main.cpp ./test/test_parseURL.cpp \
-	./test/test_get.cpp \
+	./test/test_get.cpp ./test/test_post.cpp \
 	-I ./src/ \
 	./src/xios.cpp \
 	-I test/catch2/include \

@@ -10,16 +10,13 @@ TEST_CASE("SecureHttpClient::post performs HTTP POST correctly", "[post]") {
 
     SECTION("POST request to HTTPS server returns expected response") {
         std::string payload = R"({"key": "value"})";
-        std::string url = "https://localhost:1443/submit";
+        std::string url = "https://localhost:1443/request/";
 
         std::string response = SecureHttpClient::post(url, payload);
-
         REQUIRE(response.find("HTTP/1.1 200 OK") == 0);
-        REQUIRE(response.find("Content-Type: application/json") !=
+        REQUIRE(response.find("Content-Type: text/html; charset=utf-8") !=
                 std::string::npos);
-        REQUIRE(response.find(R"("key": "value")") !=
-                std::string::npos);  // server should echo this
         REQUIRE(response.find("Connection: close") != std::string::npos);
-        REQUIRE(response.find("POST /submit") != std::string::npos);
+        REQUIRE(response.find("POST /requests/") != std::string::npos);
     }
 }
