@@ -35,4 +35,3 @@ jobs:
       - name: Build native module
         run: |
           source ./build.sh
-
