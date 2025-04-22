@@ -23,7 +23,9 @@ rm -f run_tests > /dev/null
 rm -f xios_driver > /dev/null
 
 # Find Node.js include path from NVM
-NODE_INCLUDE_PATH=$(find "$HOME/.nvm/versions/node" -type d -path "*/include/node" | head -n 1)
+if [[ -z "$NODE_INCLUDE_PATH" ]]; then
+    NODE_INCLUDE_PATH=$(find "$HOME/.nvm/versions/node" -type d -path "*/include/node" | head -n 1)
+fi
 
 if [[ -z "$NODE_INCLUDE_PATH" ]]; then
     echo "❌ node_api.h not found under ~/.nvm. Is Node.js installed via NVM?"
