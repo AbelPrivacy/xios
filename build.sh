@@ -47,15 +47,17 @@ g++ -std=c++20 -o test/catch2/src/libcatch2.o test/catch2/src/catch_amalgamated.
 echo "Building reverse https proxy..."
 
 g++ --std=c++20 -c ./util/reverse-https-proxy.cpp \
+	-O3 -ffast-math \
 	-L lib -I include -I include/wolfssl \
-	-lwolfssl -fcxx-exceptions -pthread > reverse-https-proxy.o.log
+	-lwolfssl -pthread > reverse-https-proxy.o.log
 
 g++ --std=c++20 ./reverse-https-proxy.o  \
+	-O3 -ffast-math \
 	--target=arm64-apple-darwin \
 	-Llib -lwolfssl \
 	-Iinclude \
 	-o ./util/reverse-https-proxy \
-	-fcxx-exceptions -pthread \
+	-pthread \
     -framework CoreFoundation -framework Security > reverse-https-proxy.log
 
 echo "Building xios library..."
@@ -69,7 +71,7 @@ g++ -std=c++20 \
 	--target=arm64-apple-darwin \
 	secure_http_client_napi.cpp \
 	./test/catch2/src/catch_amalgamated.cpp \
-	-fcxx-exceptions -pthread -static > xios.o.log
+	-pthread -static > xios.o.log
 	
 rm -rf ./lib/libwolfssl.a.dir/
 mkdir ./lib/libwolfssl.a.dir/
@@ -85,6 +87,7 @@ echo "Building test driver..."
 
 g++ -std=c++20 ./test/test_main.cpp ./test/test_parseURL.cpp \
 	./test/test_get.cpp ./test/test_post.cpp \
+	-O3 -ffast-math \
 	-I ./src/ \
 	./src/xios.cpp \
 	-I test/catch2/include \
