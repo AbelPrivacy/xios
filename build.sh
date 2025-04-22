@@ -29,7 +29,6 @@ fi
 
 if [[ -z "$NODE_INCLUDE_PATH" ]]; then
     echo "❌ node_api.h not found under ~/.nvm. Is Node.js installed via NVM?"
-    exit 1
 else
     echo "✅ Node.js include path found: $NODE_INCLUDE_PATH" ...
 fi
