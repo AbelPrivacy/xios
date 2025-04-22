@@ -36,6 +36,15 @@ lint:
     - shfmt@3.6.0
     - trufflehog@3.88.24
     - yamllint@1.37.0
+  ignore:
+    - linters: [ALL]
+      paths: [
+        ./include/*/**,
+        ./lib/*/**,
+        ./venv/*/**,
+        ./node-modules/*/**,
+        ./test/catch2/,
+      ]
 actions:
   disabled:
     - trunk-announce
