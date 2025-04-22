@@ -38,13 +38,13 @@ lint:
     - yamllint@1.37.0
   ignore:
     - linters: [ALL]
-      paths: [
-        ./include/*/**,
-        ./lib/*/**,
-        ./venv/*/**,
-        ./node-modules/*/**,
-        ./test/catch2/,
-      ]
+      paths:
+        - include,
+        - lib,
+        - venv,
+        - node-modules,
+        - test/catch2/
+
 actions:
   disabled:
     - trunk-announce
@@ -61,7 +61,6 @@ tools:
     - clang-tidy@16.0.3
     - clangd-indexing-tools@19.1.2
     - clangd@19.1.2
-    - cmake-format@0.6.13
     - cspell@8.19.2
     - codespell@2.4.1
     - prettier@3.5.3
