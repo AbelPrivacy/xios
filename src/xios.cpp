@@ -69,20 +69,19 @@ void SecureHttpClient::applyProtocolRestrictions(WOLFSSL_CTX* ctx) {
     options |= WOLFSSL_OP_NO_TLSv1_2;
     options |= WOLFSSL_OP_NO_TLSv1_3;
 
-    auto lambda = [&options](const char* proto) {
-        if (std::strcmp(proto, "TLSv1.2") == 0) {
-            options &= ~WOLFSSL_OP_NO_TLSv1_2;
-        } else if (std::strcmp(proto, "TLSv1.3") == 0) {
-            options &= ~WOLFSSL_OP_NO_TLSv1_3;
-        } else if (std::strcmp(proto, "TLSv1.1") == 0) {
-            options &= ~WOLFSSL_OP_NO_TLSv1_1;
-        } else if (std::strcmp(proto, "TLSv1") == 0) {
-            options &= ~WOLFSSL_OP_NO_TLSv1;
-        }
-    };
+    // auto lambda = [&options](const char* proto) {
+    // };
 
     for (const std::string& proto : SecureHttpClient::s_allowedProtocols) {
-        lambda(proto.c_str());
+        if (std::strcmp(proto.c_str(), "TLSv1.2") == 0) {
+            options &= ~WOLFSSL_OP_NO_TLSv1_2;
+        } else if (std::strcmp(proto.c_str(), "TLSv1.3") == 0) {
+            options &= ~WOLFSSL_OP_NO_TLSv1_3;
+        } else if (std::strcmp(proto.c_str(), "TLSv1.1") == 0) {
+            options &= ~WOLFSSL_OP_NO_TLSv1_1;
+        } else if (std::strcmp(proto.c_str(), "TLSv1") == 0) {
+            options &= ~WOLFSSL_OP_NO_TLSv1;
+        }
     }
 
     // Apply cipher suite allowlist/blocklist
@@ -244,6 +243,7 @@ SecureHttpClient::prepare_for_request(const std::string url) {
 
     if (!SecureHttpClient::isProtocolAllowed(protocol) ||
         !SecureHttpClient::isImplementationAllowed(cipher)) {
+        std::cerr << protocol << ", " << cipher << std::endl;
         wolfSSL_free(ssl);
         wolfSSL_CTX_free(ctx);
         close(sockfd);

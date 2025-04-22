@@ -1,5 +1,7 @@
 #! /bin/bash
 
+echo "Cleaning up old build artifacts..."
+
 rm -rf build_bak
 mkdir build_bak
 
@@ -20,61 +22,93 @@ rm -f metadata.db
 rm -f run_tests
 rm -f xios_driver
 
+# Find Node.js include path from NVM
+NODE_INCLUDE_PATH=$(find "$HOME/.nvm/versions/node" -type d -path "*/include/node" | head -n 1)
+
+if [[ -z "$NODE_INCLUDE_PATH" ]]; then
+    echo "❌ node_api.h not found under ~/.nvm. Is Node.js installed via NVM?"
+    exit 1
+else
+    echo "✅ Node.js include path found: $NODE_INCLUDE_PATH" ...
+fi
+
+echo "Downloading prebuilt wolfssl binaries..."
+
 gh release download PQC-Release --repo AbelPrivacy/wolfssl
 
 tar -xzf build-x86_64.tar.gz
 tar -xzf build-osx-arm64.tar.gz
 
-g++ --std=c++20 ./util/reverse-https-proxy.cpp -I ~/homebrew/include/ \
-	-I build_x86_64/include \
-	-L build_x86_64/lib \
-	-I build-osx-arm64/wolfssl \
-	-L build-osx-arm64/lib -lwolfssl -o ./util/reverse-https-proxy
+echo "Building catch2 testing framework..."
 
-g++ -std=c++17 -lwolfssl -lsqlite3 -o secure_http_client -c src/xios.cpp \
-	-I build_x86_64/include \
-	-L build_x86_64/lib \
-	-I build-osx-arm64/wolfssl \
-	-L build-osx-arm64/lib \
-	-L ~/homebrew/Cellar/sqlite/3.49.1/lib \
-	-I ~/homebrew/Cellar/sqlite/3.49.1/include \
-	-o xios.o
+g++ -std=c++20 -o test/catch2/src/libcatch2.o test/catch2/src/catch_amalgamated.cpp
 
-g++ -std=c++17 ./test/test.cpp ./test/test_parseURL.cpp \
-	./test/test_get.cpp xios.o \
-	-I build_x86_64/include \
-	-L build_x86_64/lib \
-	-I build-osx-arm64/wolfssl \
-	-L build-osx-arm64/lib \
-	-L ~/homebrew/Cellar/sqlite/3.49.1/lib \
-	-I ~/homebrew/Cellar/sqlite/3.49.1/include \
+echo "Building reverse https proxy..."
+
+g++ --std=c++20 -c ./util/reverse-https-proxy.cpp \
+	-L lib -I include -I include/wolfssl \
+	-lwolfssl -fcxx-exceptions -pthread
+
+g++ --std=c++20 ./reverse-https-proxy.o  \
+	--target=arm64-apple-darwin \
+	-Llib -lwolfssl \
+	-Iinclude \
+	-o ./util/reverse-https-proxy \
+	-fcxx-exceptions -pthread 
+
+echo "Building xios library..."
+
+g++ -std=c++20 \
+	-O3 -ffast-math \
+	-I include \
+	-I ./node_modules/node-addon-api/ \
+	-I "$NODE_INCLUDE_PATH"  \
+	-c src/xios.cpp \
+	--target=arm64-apple-darwin \
+	secure_http_client_napi.cpp \
+	./test/catch2/src/catch_amalgamated.cpp \
+	-fcxx-exceptions -pthread -static
+	
+
+ar rvs ./lib/libxios.a xios.o catch_amalgamated.o secure_http_client_napi.o lib/sqlite3.o lib/libwolfssl.a
+
+echo "Building test driver..."
+
+g++ -std=c++20 ./test/test_main.cpp ./test/test_parseURL.cpp \
+	./test/test_get.cpp \
+	-I ./src/ \
+	./src/xios.cpp \
+	-I test/catch2/include \
+	--target=arm64-apple-darwin \
+	-pthread \
+	./test/catch2/src/catch_amalgamated.cpp \
+	-o run_tests \
+	-L lib \
+	-I include \
+	-I include/wolfssl \
 	-lwolfssl -lsqlite3 \
-	-o run_tests
+    -framework CoreFoundation -framework Security
 
-g++ -std=c++17 ./main.cpp xios.o \
-	-I build_x86_64/include \
-	-L build_x86_64/lib \
-	-I build-osx-arm64/wolfssl \
-	-L build-osx-arm64/lib \
-	-L ~/homebrew/Cellar/sqlite/3.49.1/lib \
-	-I ~/homebrew/Cellar/sqlite/3.49.1/include \
-	-lwolfssl -lsqlite3 \
-	-o xios_driver
 
+echo "Installing Node dependencies..."
 
 npm update
 npm i node-gyp
 npm i node-addon-api
 
-echo 'y' | npx node-gyp configure build
+echo "Building N-API node module with node-gyp..."
 
+echo 'y' | npx node-gyp configure build  >node-gyp.configure.build.log 2>&1
+
+echo "Activating Python venv..."
 source ./venv/bin/activate
 
-echo "Starting proxy server..."
+echo "Starting reverse https proxy server..."
 ./util/reverse-https-proxy 127.0.0.1 8080 127.0.0.1 1443 >proxy.log 2>&1 &
 PROXY_PID=$!
 sleep 2 # Wait for proxy to start
 
+echo "Running test REST API..."
 python test/test_rest_api/app.py >backend.log 2>&1 &
 BACKEND_PID=$!
 sleep 2
