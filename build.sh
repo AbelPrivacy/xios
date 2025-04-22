@@ -53,12 +53,10 @@ g++ --std=c++20 -c ./util/reverse-https-proxy.cpp \
 
 g++ --std=c++20 ./reverse-https-proxy.o  \
 	-O3 -ffast-math \
-	--target=arm64-apple-darwin \
 	-Llib -lwolfssl \
 	-Iinclude \
 	-o ./util/reverse-https-proxy \
-	-pthread \
-    -framework CoreFoundation -framework Security > reverse-https-proxy.log
+	-pthread > reverse-https-proxy.log
 
 echo "Building xios library..."
 
@@ -68,7 +66,6 @@ g++ -std=c++20 \
 	-I ./node_modules/node-addon-api/ \
 	-I "$NODE_INCLUDE_PATH"  \
 	-c src/xios.cpp \
-	--target=arm64-apple-darwin \
 	secure_http_client_napi.cpp \
 	./test/catch2/src/catch_amalgamated.cpp \
 	-pthread -static > xios.o.log
@@ -91,15 +88,13 @@ g++ -std=c++20 ./test/test_main.cpp ./test/test_parseURL.cpp \
 	-I ./src/ \
 	./src/xios.cpp \
 	-I test/catch2/include \
-	--target=arm64-apple-darwin \
 	-pthread \
 	./test/catch2/src/catch_amalgamated.cpp \
 	-o run_tests \
 	-L lib \
 	-I include \
 	-I include/wolfssl \
-	-lwolfssl -lsqlite3 \
-    -framework CoreFoundation -framework Security
+	-lwolfssl -lsqlite3
 
 
 echo "Installing Node dependencies..."
