@@ -16,6 +16,6 @@ jobs:
           fetch-depth: 0
       - uses: yesolutions/mirror-action@master
         with:
-          REMOTE: 'https://gitlab.com/spyoungtech/mirror-action.git'
+          REMOTE: 'https://opensource.ieee.org/make_a_picture/xios.git'
           GIT_USERNAME: make_a_picture 
           GIT_PASSWORD: ${{ secrets.GIT_PASSWORD }}
