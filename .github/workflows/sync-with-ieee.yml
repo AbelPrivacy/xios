@@ -1,0 +1,20 @@
+---
+name: sync repo with ieee open source
+run-name: sync repo with ieee open source
+on: [push]
+
+env:
+    GH_TOKEN: ${{ github.token }}
+
+jobs:
+  sync-with-ieee:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - uses: yesolutions/mirror-action@master
+        with:
+          REMOTE: 'https://gitlab.com/spyoungtech/mirror-action.git'
+          GIT_USERNAME: make_a_picture 
+          GIT_PASSWORD: ${{ secrets.GIT_PASSWORD }}
