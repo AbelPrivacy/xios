@@ -1,7 +1,6 @@
 *.a*
 *.la*
 *Testing
-test/catch2
 node_modules
 build
 *.o
