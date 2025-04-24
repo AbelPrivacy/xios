@@ -5,6 +5,12 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
+if(APPLE)
+    set(WOLFSSL_ARCHIVE "build-osx-arm64.tar.gz")
+elseif(UNIX)
+    set(WOLFSSL_ARCHIVE "build-x86_64.tar.gz")
+endif()
+
 include(FetchContent)
 
 # ---- Fetch Catch2 (for unit tests) ----
@@ -36,17 +42,14 @@ target_include_directories(xios
     PUBLIC
         ${PROJECT_SOURCE_DIR}/include
         ${PROJECT_SOURCE_DIR}/src
-        ${PROJECT_SOURCE_DIR}/build-osx-arm64/wolfssl
+        ${PROJECT_SOURCE_DIR}/${WOLFSSL_ARCHIVE}
         ${PROJECT_SOURCE_DIR}/node_modules/node-addon-api
         ${NODE_INCLUDE_DIR}
-        /opt/homebrew/include
-        /opt/homebrew/Cellar/sqlite/3.49.1/include
 )
 
 target_link_directories(xios
     PUBLIC
-        ${PROJECT_SOURCE_DIR}/build-osx-arm64/lib
-        /Users/kylemcgrath/homebrew/Cellar/sqlite/3.49.1/lib
+        ${PROJECT_SOURCE_DIR}/lib/
 )
 
 target_link_libraries(xios
@@ -54,6 +57,22 @@ target_link_libraries(xios
         wolfssl
         sqlite3
         pthread
+)
+add_custom_command(TARGET xios POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_BINARY_DIR}/lib/
+    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_SOURCE_DIR}/lib/libwolfssl.a ${CMAKE_BINARY_DIR}/lib/libwolfssl.a
+    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_SOURCE_DIR}/lib/sqlite3.o ${CMAKE_BINARY_DIR}/lib/sqlite3.o
+    COMMAND cd ${CMAKE_BINARY_DIR}/lib/ && ar x ${CMAKE_BINARY_DIR}/lib/libwolfssl.a
+    COMMAND ar rvs ${CMAKE_BINARY_DIR}/lib/libxios.a ${CMAKE_BINARY_DIR}/lib/*.o
+    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+    COMMENT "Rebuilding static xios with wolfSSL objects"
+)
+
+add_custom_command(TARGET xios POST_BUILD
+    COMMAND rm -f ${CMAKE_SOURCE_DIR}/lib/libxios.a
+    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/lib/libxios.a ${CMAKE_SOURCE_DIR}/lib/libxios.a
+    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+    COMMENT "Copying libxios.a to lib directory"
 )
 
 # ---- Add xios_tests ----
