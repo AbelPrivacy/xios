@@ -1,0 +1,21 @@
+---
+name: sync repo with ieee open source
+run-name: sync repo with ieee open source
+on: [push]
+
+env:
+    GH_TOKEN: ${{ github.token }}
+
+jobs:
+  sync-with-ieee:
+    runs-on: ubuntu-latest
+    environment: sync-with-ieee
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - uses: yesolutions/mirror-action@master
+        with:
+          REMOTE: 'https://opensource.ieee.org/make_a_picture/xios.git'
+          GIT_USERNAME: make_a_picture 
+          GIT_PASSWORD: ${{ secrets.GIT_PASSWORD }}
