@@ -42,33 +42,28 @@ tar -xzf build-osx-arm64.tar.gz
 
 echo "Building catch2 testing framework..."
 
-g++ -std=c++20 -o test/catch2/src/libcatch2.o test/catch2/src/catch_amalgamated.cpp
+g++ -std=c++20 -o test/catch2/src/libcatch2.o test/catch2/src/catch_amalgamated.cpp -Wnan-infinity-disabled
+
 
 echo "Building reverse https proxy..."
 
-g++ --std=c++20 -c ./util/reverse-https-proxy.cpp \
-	-O3 -ffast-math \
-	-L lib -I include -I include/wolfssl \
-	-lwolfssl -pthread > reverse-https-proxy.o.log
-
-g++ --std=c++20 ./reverse-https-proxy.o  \
-	-O3 -ffast-math \
+g++ --std=c++20 ./util/reverse-https-proxy.cpp  \
+	-ffast-math \
 	-Llib -lwolfssl \
 	-Iinclude \
 	-o ./util/reverse-https-proxy \
-	-pthread > reverse-https-proxy.log
+	-pthread \
+    -framework CoreFoundation -framework Security
 
 echo "Building xios library..."
 
 g++ -std=c++20 \
-	-O3 -ffast-math \
+	-ffast-math \
 	-I include \
 	-I ./node_modules/node-addon-api/ \
 	-I "$NODE_INCLUDE_PATH"  \
 	-c src/xios.cpp \
-	secure_http_client_napi.cpp \
-	./test/catch2/src/catch_amalgamated.cpp \
-	-pthread -static > xios.o.log
+	-pthread -static
 	
 rm -rf ./lib/libwolfssl.a.dir/
 mkdir ./lib/libwolfssl.a.dir/
@@ -78,13 +73,13 @@ cd ./lib/libwolfssl.a.dir/
 ar x libwolfssl.a
 cd ../../
 
-ar rvs ./lib/libxios.a xios.o catch_amalgamated.o secure_http_client_napi.o lib/sqlite3.o ./lib/libwolfssl.a.dir/*.o > xios.a.log
+ar rvs ./lib/libxios.a xios.o lib/sqlite3.o ./lib/libwolfssl.a.dir/*.o > xios.a.log
 
 echo "Building test driver..."
 
 g++ -std=c++20 ./test/test_main.cpp ./test/test_parseURL.cpp \
 	./test/test_get.cpp ./test/test_post.cpp \
-	-O3 -ffast-math \
+	-ffast-math \
 	-I ./src/ \
 	./src/xios.cpp \
 	-I test/catch2/include \
@@ -94,7 +89,8 @@ g++ -std=c++20 ./test/test_main.cpp ./test/test_parseURL.cpp \
 	-L lib \
 	-I include \
 	-I include/wolfssl \
-	-lwolfssl -lsqlite3
+	-lwolfssl -lsqlite3 -lxios \
+    -framework CoreFoundation -framework Security -w
 
 
 echo "Installing Node dependencies..."
@@ -113,7 +109,7 @@ source ./venv/bin/activate
 echo "Starting reverse https proxy server..."
 ./util/reverse-https-proxy 127.0.0.1 8080 127.0.0.1 1443 >proxy.log 2>&1 &
 PROXY_PID=$!
-sleep 2 # Wait for proxy to start
+sleep 2
 
 echo "Running test REST API..."
 python test/test_rest_api/app.py >backend.log 2>&1 &
@@ -128,8 +124,6 @@ if ./run_tests; then
 	exit 0
 else
 	echo "Integration test FAILED"
-	cat proxy.log || true
-	cat backend.log || true
 	kill "${PROXY_PID}"
 	kill "${BACKEND_PID}"
 	exit 1
