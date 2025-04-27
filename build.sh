@@ -28,6 +28,10 @@ if [[ -z "$NODE_INCLUDE_PATH" ]]; then
 fi
 
 if [[ -z "$NODE_INCLUDE_PATH" ]]; then
+	node -p "require('node-addon-api').include_dir"
+fi
+
+if [[ -z "$NODE_INCLUDE_PATH" ]]; then
     echo "❌ node_api.h not found under ~/.nvm. Is Node.js installed via NVM?"
 else
     echo "✅ Node.js include path found: $NODE_INCLUDE_PATH" ...
@@ -42,7 +46,7 @@ tar -xzf build-osx-arm64.tar.gz
 
 echo "Building catch2 testing framework..."
 
-g++ -std=c++20 -o test/catch2/src/libcatch2.o test/catch2/src/catch_amalgamated.cpp -Wnan-infinity-disabled
+g++ -std=c++20 -o test/catch2/src/libcatch2.o test/catch2/src/catch_amalgamated.cpp
 
 
 echo "Building reverse https proxy..."
