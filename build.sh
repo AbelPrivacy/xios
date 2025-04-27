@@ -28,7 +28,11 @@ if [[ -z "$NODE_INCLUDE_PATH" ]]; then
 fi
 
 if [[ -z "$NODE_INCLUDE_PATH" ]]; then
-	node -p "require('node-addon-api').include_dir"
+    NODE_VERSIONS_DIR="$HOME/.nvm/versions/node"
+
+    if [[ -d "$NODE_VERSIONS_DIR" ]]; then
+        NODE_INCLUDE_PATH=$(find "$NODE_VERSIONS_DIR" -maxdepth 3 -type d -path "*/include/node" | head -n 1)
+    fi
 fi
 
 if [[ -z "$NODE_INCLUDE_PATH" ]]; then
