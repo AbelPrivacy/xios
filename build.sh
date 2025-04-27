@@ -41,6 +41,7 @@ else
     echo "✅ Node.js include path found: $NODE_INCLUDE_PATH" ...
 fi
 
+
 echo "Downloading prebuilt wolfssl binaries..."
 
 gh release download PQC-Release --repo AbelPrivacy/wolfssl
@@ -55,14 +56,24 @@ g++ -std=c++20 -o test/catch2/src/libcatch2.o test/catch2/src/catch_amalgamated.
 
 echo "Building reverse https proxy..."
 
-g++ --std=c++20 ./util/reverse-https-proxy.cpp  \
-	-ffast-math \
-	-Llib -lwolfssl \
-	-Iinclude \
-	-o ./util/reverse-https-proxy \
-	-pthread \
-    -framework CoreFoundation -framework Security
-
+platform='unknown'
+unamestr=$(uname)
+if [[ "$unamestr" == 'Linux' ]]; then
+	g++ --std=c++20 ./util/reverse-https-proxy.cpp  \
+		-ffast-math \
+		-Llib -lwolfssl \
+		-Iinclude \
+		-o ./util/reverse-https-proxy \
+		-pthread
+elif [[ "$unamestr" == 'Darwin' ]]; then
+	g++ --std=c++20 ./util/reverse-https-proxy.cpp  \
+		-ffast-math \
+		-Llib -lwolfssl \
+		-Iinclude \
+		-o ./util/reverse-https-proxy \
+		-pthread \
+		-framework CoreFoundation -framework Security
+fi
 echo "Building xios library..."
 
 g++ -std=c++20 \
@@ -85,21 +96,38 @@ ar rvs ./lib/libxios.a xios.o lib/sqlite3.o ./lib/libwolfssl.a.dir/*.o > xios.a.
 
 echo "Building test driver..."
 
-g++ -std=c++20 ./test/test_main.cpp ./test/test_parseURL.cpp \
-	./test/test_get.cpp ./test/test_post.cpp \
-	-ffast-math \
-	-I ./src/ \
-	./src/xios.cpp \
-	-I test/catch2/include \
-	-pthread \
-	./test/catch2/src/catch_amalgamated.cpp \
-	-o run_tests \
-	-L lib \
-	-I include \
-	-I include/wolfssl \
-	-lwolfssl -lsqlite3 -lxios \
-    -framework CoreFoundation -framework Security -w
-
+platform='unknown'
+unamestr=$(uname)
+if [[ "$unamestr" == 'Linux' ]]; then
+	g++ -std=c++20 ./test/test_main.cpp ./test/test_parseURL.cpp \
+		./test/test_get.cpp ./test/test_post.cpp \
+		-ffast-math \
+		-I ./src/ \
+		./src/xios.cpp \
+		-I test/catch2/include \
+		-pthread \
+		./test/catch2/src/catch_amalgamated.cpp \
+		-o run_tests \
+		-L lib \
+		-I include \
+		-I include/wolfssl \
+		-lwolfssl -lsqlite3 -lxios -w
+elif [[ "$unamestr" == 'Darwin' ]]; then
+	g++ -std=c++20 ./test/test_main.cpp ./test/test_parseURL.cpp \
+		./test/test_get.cpp ./test/test_post.cpp \
+		-ffast-math \
+		-I ./src/ \
+		./src/xios.cpp \
+		-I test/catch2/include \
+		-pthread \
+		./test/catch2/src/catch_amalgamated.cpp \
+		-o run_tests \
+		-L lib \
+		-I include \
+		-I include/wolfssl \
+		-lwolfssl -lsqlite3 -lxios \
+		-framework CoreFoundation -framework Security -w
+fi
 
 echo "Installing Node dependencies..."
 
