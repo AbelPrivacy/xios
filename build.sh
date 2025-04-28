@@ -28,11 +28,7 @@ if [[ -z "$NODE_INCLUDE_PATH" ]]; then
 fi
 
 if [[ -z "$NODE_INCLUDE_PATH" ]]; then
-    NODE_VERSIONS_DIR="$HOME/.nvm/versions/node"
-
-    if [[ -d "$NODE_VERSIONS_DIR" ]]; then
-        NODE_INCLUDE_PATH=$(find "$NODE_VERSIONS_DIR" -maxdepth 3 -type d -path "*/include/node" | head -n 1)
-    fi
+    NODE_INCLUDE_PATH=$(find "$HOME/nvm/versions/node" -type d -path "*/include/node" | head -n 1)
 fi
 
 if [[ -z "$NODE_INCLUDE_PATH" ]]; then
@@ -56,10 +52,9 @@ g++ -std=c++20 -o test/catch2/src/libcatch2.o test/catch2/src/catch_amalgamated.
 
 echo "Building reverse https proxy..."
 
-platform='unknown'
 unamestr=$(uname)
 if [[ "$unamestr" == 'Linux' ]]; then
-	g++ --std=c++20 ./util/reverse-https-proxy.cpp  \
+	g++ ./util/reverse-https-proxy.cpp  \
 		-ffast-math \
 		-Llib -lwolfssl \
 		-Iinclude \
@@ -76,14 +71,24 @@ elif [[ "$unamestr" == 'Darwin' ]]; then
 fi
 echo "Building xios library..."
 
-g++ -std=c++20 \
-	-ffast-math \
-	-I include \
-	-I ./node_modules/node-addon-api/ \
-	-I "$NODE_INCLUDE_PATH"  \
-	-c src/xios.cpp \
-	-pthread -static
 	
+if [[ "$unamestr" == 'Linux' ]]; then
+	g++ -ffast-math \
+		-I include \
+		-I ./node_modules/node-addon-api/ \
+		-I "$NODE_INCLUDE_PATH"  \
+		-c src/xios.cpp \
+		-pthread -static
+elif [[ "$unamestr" == 'Darwin' ]]; then
+	g++ -std=c++20 \
+		-ffast-math \
+		-I include \
+		-I ./node_modules/node-addon-api/ \
+		-I "$NODE_INCLUDE_PATH"  \
+		-c src/xios.cpp \
+		-pthread -static
+fi
+
 rm -rf ./lib/libwolfssl.a.dir/
 mkdir ./lib/libwolfssl.a.dir/
 cp lib/libwolfssl.a ./lib/libwolfssl.a.dir/
@@ -96,10 +101,9 @@ ar rvs ./lib/libxios.a xios.o lib/sqlite3.o ./lib/libwolfssl.a.dir/*.o > xios.a.
 
 echo "Building test driver..."
 
-platform='unknown'
 unamestr=$(uname)
 if [[ "$unamestr" == 'Linux' ]]; then
-	g++ -std=c++20 ./test/test_main.cpp ./test/test_parseURL.cpp \
+	g++ ./test/test_main.cpp ./test/test_parseURL.cpp \
 		./test/test_get.cpp ./test/test_post.cpp \
 		-ffast-math \
 		-I ./src/ \
