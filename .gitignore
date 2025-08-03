@@ -2,7 +2,6 @@
 *.la*
 *Testing
 node_modules
-build
 *.o
 *.a
 xios_driver
@@ -11,18 +10,15 @@ xios_driver
 .DS_STORE
 run_tests
 venv
-<<<<<<< HEAD
 backend.log
 build-osx-arm64.tar.gz
 build-osx-arm64/
 build-x86_64.tar.gz
 build_x86_64/
 proxy.log
-util/reverse-https-proxy
-=======
 build*
 util/reverse-https-proxy
 *log
 test_server
 *pyc
->>>>>>> origin/issue_13_reorganize_cpp_hpp
+test/catch2
