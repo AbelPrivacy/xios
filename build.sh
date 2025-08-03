@@ -28,10 +28,15 @@ if [[ -z "$NODE_INCLUDE_PATH" ]]; then
 fi
 
 if [[ -z "$NODE_INCLUDE_PATH" ]]; then
+    NODE_INCLUDE_PATH=$(find "$HOME/nvm/versions/node" -type d -path "*/include/node" | head -n 1)
+fi
+
+if [[ -z "$NODE_INCLUDE_PATH" ]]; then
     echo "❌ node_api.h not found under ~/.nvm. Is Node.js installed via NVM?"
 else
     echo "✅ Node.js include path found: $NODE_INCLUDE_PATH" ...
 fi
+
 
 echo "Downloading prebuilt wolfssl binaries..."
 
@@ -44,32 +49,46 @@ echo "Building catch2 testing framework..."
 
 g++ -std=c++20 -o test/catch2/src/libcatch2.o test/catch2/src/catch_amalgamated.cpp
 
+
 echo "Building reverse https proxy..."
 
-g++ --std=c++20 -c ./util/reverse-https-proxy.cpp \
-	-O3 -ffast-math \
-	-L lib -I include -I include/wolfssl \
-	-lwolfssl -pthread > reverse-https-proxy.o.log
-
-g++ --std=c++20 ./reverse-https-proxy.o  \
-	-O3 -ffast-math \
-	-Llib -lwolfssl \
-	-Iinclude \
-	-o ./util/reverse-https-proxy \
-	-pthread > reverse-https-proxy.log
-
+unamestr=$(uname)
+if [[ "$unamestr" == 'Linux' ]]; then
+	g++ ./util/reverse-https-proxy.cpp  \
+		-ffast-math \
+		-Llib -lwolfssl \
+		-Iinclude \
+		-o ./util/reverse-https-proxy \
+		-pthread
+elif [[ "$unamestr" == 'Darwin' ]]; then
+	g++ --std=c++20 ./util/reverse-https-proxy.cpp  \
+		-ffast-math \
+		-Llib -lwolfssl \
+		-Iinclude \
+		-o ./util/reverse-https-proxy \
+		-pthread \
+		-framework CoreFoundation -framework Security
+fi
 echo "Building xios library..."
 
-g++ -std=c++20 \
-	-O3 -ffast-math \
-	-I include \
-	-I ./node_modules/node-addon-api/ \
-	-I "$NODE_INCLUDE_PATH"  \
-	-c src/xios.cpp \
-	secure_http_client_napi.cpp \
-	./test/catch2/src/catch_amalgamated.cpp \
-	-pthread -static > xios.o.log
 	
+if [[ "$unamestr" == 'Linux' ]]; then
+	g++ -ffast-math \
+		-I include \
+		-I ./node_modules/node-addon-api/ \
+		-I "$NODE_INCLUDE_PATH"  \
+		-c src/xios.cpp \
+		-pthread -static
+elif [[ "$unamestr" == 'Darwin' ]]; then
+	g++ -std=c++20 \
+		-ffast-math \
+		-I include \
+		-I ./node_modules/node-addon-api/ \
+		-I "$NODE_INCLUDE_PATH"  \
+		-c src/xios.cpp \
+		-pthread -static
+fi
+
 rm -rf ./lib/libwolfssl.a.dir/
 mkdir ./lib/libwolfssl.a.dir/
 cp lib/libwolfssl.a ./lib/libwolfssl.a.dir/
@@ -78,24 +97,41 @@ cd ./lib/libwolfssl.a.dir/
 ar x libwolfssl.a
 cd ../../
 
-ar rvs ./lib/libxios.a xios.o catch_amalgamated.o secure_http_client_napi.o lib/sqlite3.o ./lib/libwolfssl.a.dir/*.o > xios.a.log
+ar rvs ./lib/libxios.a xios.o lib/sqlite3.o ./lib/libwolfssl.a.dir/*.o > xios.a.log
 
 echo "Building test driver..."
 
-g++ -std=c++20 ./test/test_main.cpp ./test/test_parseURL.cpp \
-	./test/test_get.cpp ./test/test_post.cpp \
-	-O3 -ffast-math \
-	-I ./src/ \
-	./src/xios.cpp \
-	-I test/catch2/include \
-	-pthread \
-	./test/catch2/src/catch_amalgamated.cpp \
-	-o run_tests \
-	-L lib \
-	-I include \
-	-I include/wolfssl \
-	-lwolfssl -lsqlite3
-
+unamestr=$(uname)
+if [[ "$unamestr" == 'Linux' ]]; then
+	g++ ./test/test_main.cpp ./test/test_parseURL.cpp \
+		./test/test_get.cpp ./test/test_post.cpp \
+		-ffast-math \
+		-I ./src/ \
+		./src/xios.cpp \
+		-I test/catch2/include \
+		-pthread \
+		./test/catch2/src/catch_amalgamated.cpp \
+		-o run_tests \
+		-L lib \
+		-I include \
+		-I include/wolfssl \
+		-lwolfssl -lsqlite3 -lxios -w
+elif [[ "$unamestr" == 'Darwin' ]]; then
+	g++ -std=c++20 ./test/test_main.cpp ./test/test_parseURL.cpp \
+		./test/test_get.cpp ./test/test_post.cpp \
+		-ffast-math \
+		-I ./src/ \
+		./src/xios.cpp \
+		-I test/catch2/include \
+		-pthread \
+		./test/catch2/src/catch_amalgamated.cpp \
+		-o run_tests \
+		-L lib \
+		-I include \
+		-I include/wolfssl \
+		-lwolfssl -lsqlite3 -lxios \
+		-framework CoreFoundation -framework Security -w
+fi
 
 echo "Installing Node dependencies..."
 
@@ -113,7 +149,7 @@ source ./venv/bin/activate
 echo "Starting reverse https proxy server..."
 ./util/reverse-https-proxy 127.0.0.1 8080 127.0.0.1 1443 >proxy.log 2>&1 &
 PROXY_PID=$!
-sleep 2 # Wait for proxy to start
+sleep 2
 
 echo "Running test REST API..."
 python test/test_rest_api/app.py >backend.log 2>&1 &
@@ -128,8 +164,6 @@ if ./run_tests; then
 	exit 0
 else
 	echo "Integration test FAILED"
-	cat proxy.log || true
-	cat backend.log || true
 	kill "${PROXY_PID}"
 	kill "${BACKEND_PID}"
 	exit 1

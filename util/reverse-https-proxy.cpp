@@ -14,7 +14,7 @@
 
 #include <exception>
 
-char* proxy_server_addr;
+const char* proxy_server_addr;
 int proxy_server_port;
 const char* backend_host;
 int backend_port;
@@ -77,7 +77,7 @@ int main(int argc, char** argv) {
         err_sys("Failed to load key");
 
     // Use all supported ciphers (including hybrid/OQS)
-    if (wolfSSL_CTX_set_cipher_list(ctx, "ALL") != WOLFSSL_SUCCESS)
+    if (wolfSSL_CTX_set_cipher_list(ctx, "TLS13-AES256-GCM-SHA384") != WOLFSSL_SUCCESS)
         err_sys("Failed to set cipher list");
 
 
